@@ -1,14 +1,13 @@
+import java.util.ArrayList;
+
 public interface ResInterface {
-    boolean getDate();
-    boolean getTime();
-    int getAmtOfPeople();
-    
-    void setDate();
-    void setTime();
-    void setAmtOfPeople();
-    
-    boolean booked();
-    void assignTable(int tableNum);
-    void cancel();
-    
+    String getDate();
+    String getTime();
+    int getNumPeople();
+    ArrayList<Integer> getSeats();
+
+    void setDate(String date);
+    void setTime(String time);
+    void setNumPeople(int numPeople);
+    void setSeats(ArrayList<Integer> seats);
 }
