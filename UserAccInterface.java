@@ -1,5 +1,12 @@
 import java.util.ArrayList;
-
+/**
+ * An interface for the UserAccount class that contains all the methods for the class to implement.
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author Pranav Jasti, lab sec L23
+ * @version November 8, 2025
+ */
 public interface UserAccInterface {
     
     //getter methods
