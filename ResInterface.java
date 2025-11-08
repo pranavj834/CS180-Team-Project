@@ -7,6 +7,7 @@ public interface ResInterface {
     int getNumPeople(); //returns the number of people reserving the seats
     ArrayList<Integer> getSeats(); //returns the seats of the people who booked the reservation
 
+    //setters
     void setDate(String date); //sets the date for the reservation
     void setTime(String time); //sets the time for the reservation
     void setNumPeople(int numPeople); //sets the number of people reserving the seats
