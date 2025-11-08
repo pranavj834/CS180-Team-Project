@@ -1,5 +1,12 @@
 import java.util.ArrayList;
-
+/**
+ * A class that creates accounts for users who want to create reservations at a restaurant.
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author Pranav Jasti, lab sec L23
+ * @version November 8, 2025
+ */
 public class UserAccount implements UserAccInterface {
 	
 	//instance variables (usual attributes of an account)
