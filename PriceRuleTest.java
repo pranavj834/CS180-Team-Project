@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * Tests for PriceRule.
- * @author Shawn Zhu, lab sec L23
+ * @author zhu1220, lab sec L23
  * @version November 8, 2025
  */
 

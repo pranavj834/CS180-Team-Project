@@ -4,7 +4,7 @@ import java.time.LocalTime;
 
 /**
  * Tests for the DailyHours class.
- * @author Shawn Zhu, lab sec L23
+ * @author zhu1220, lab sec L23
  * @version November 8, 2025
  */
 
