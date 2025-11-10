@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+
 /**
  * A class that creates accounts for users who want to create reservations at a restaurant.
  *
@@ -7,7 +8,8 @@ import java.util.ArrayList;
  * @author Pranav Jasti, lab sec L23
  * @version November 8, 2025
  */
-public class UserAccount implements UserAccInterface {
+
+public class UserAccount implements UserAccountInterface {
 	
 	//instance variables (usual attributes of an account)
 	private String username;
@@ -27,14 +29,17 @@ public class UserAccount implements UserAccInterface {
 
 	//getter methods; gives the respective instance variable to the respective inputs given
 	public String getUsername() {
-		return username; 
+		return username;
 	}
     public String getFullName() {
-    	return fullName; 
+    	return fullName;
     }
     public String getEmail() {
     	return email;
     }
+	public String getPassword() {
+		return password;
+	}
 	public ArrayList<Reservation> getReservations() {
 		return reservations;
 	}
@@ -43,32 +48,20 @@ public class UserAccount implements UserAccInterface {
 	public void setUsername(String username) {
     	this.username = username;
     }
-    public void setFullName(String fullName) { 
+    public void setFullName(String fullName) {
     	this.fullName = fullName;
     }
-    public void setEmail(String email) { 
-    	this.email = email; 
+    public void setEmail(String email) {
+    	this.email = email;
     }
     public void setPassword(String password) {
     	this.password = password;
     }
 
 	//other methods
-	//sets all the instance variables to null to delete the account 
-	public void deleteAccount() {
-		username = null;
-		password = null;
-		fullName = null;
-		email = null;
-		reservations = null;
-	}
 	//checks to see if the entered username and password is correct
-	public boolean equals(String enteredUserName, String enteredPassword) {
-		if (enteredUserName.equals(username) && enteredPassword.equals(password)) {
-			return true;
-		}
-		return false;
-	}
+
+
 	//books a reservation
 	public boolean addReservation(Reservation res) {
 		return reservations.add(res);
@@ -78,11 +71,28 @@ public class UserAccount implements UserAccInterface {
 	public boolean removeReservation(Reservation res) {
 		return reservations.remove(res);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+
+		UserAccount acct = (UserAccount) obj;
+		String enteredUserName = acct.getUsername();
+		String enteredPassword = acct.getPassword();
+		if (username.equals(enteredUserName) && password.equals(enteredPassword)) {
+			return true;
+		}
+		return false;
+	}
+
 	//prints the account details in case necessary
 	public String toString() {
-		return "UserAccount:\n" +
-				"username = " + username + "\n" +
-				"fullName = " + fullName + "\n" +
-				"email = " + email;
+		return String.format("UserAccount for %s, %s - %s", fullName, username, email);
 	}
 }
