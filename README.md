@@ -23,7 +23,7 @@ Methods (excluding generic getters/setters):
 - addReservation: If the time slot is not currently occupied and the account is registered, adds a reservation and 
 returns true. Otherwise returns false.
 - deleteAccount: If the account is registered, remove all reservations registered under the account before 
-removing the account and returning true. If the account is not regist returns false.
+removing the account and returning true. If the account is not registered, returns false.
 - deleteReservation: If both reservation and account exist and the reservation was registered under the account,
 returns true. Otherwise returns false.
 - getAccounts: Returns the internal list of Accounts.
