@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Ryan Chan, lab sec L23
+ * @author chan531, lab sec L23
  * @version November 10, 2025
  */
 

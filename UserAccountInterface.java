@@ -5,7 +5,7 @@ import java.util.ArrayList;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Pranav Jasti, lab sec L23
+ * @author jastip, chan531, lab sec L23
  * @version November 8, 2025
  */
 

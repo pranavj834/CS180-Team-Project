@@ -6,7 +6,7 @@ import java.util.ArrayList;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Ryan Chan, lab sec L23
+ * @author chan531, lab sec L23
  * @version November 10, 2025
  */
 
@@ -69,7 +69,8 @@ public class Database implements DatabaseInterface {
         }
 
         // returns true if reservation was found under that account and removed, false otherwise
-        if (accounts.get(index).removeReservation(reservation)) {
+        boolean removed = accounts.get(index).removeReservation(reservation);
+        if (removed) {
             reservations.remove(reservation); // only remove if the given account created the reservation
             return true;
         }

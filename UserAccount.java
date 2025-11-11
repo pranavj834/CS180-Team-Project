@@ -5,7 +5,7 @@ import java.util.ArrayList;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Pranav Jasti, lab sec L23
+ * @author jastip, chan531, lab sec L23
  * @version November 8, 2025
  */
 
@@ -85,11 +85,8 @@ public class UserAccount implements UserAccountInterface {
 		UserAccount acct = (UserAccount) obj;
 		String enteredUserName = acct.getUsername();
 		String enteredPassword = acct.getPassword();
-		if (username.equals(enteredUserName) && password.equals(enteredPassword)) {
-			return true;
-		}
-		return false;
-	}
+        return username.equals(enteredUserName) && password.equals(enteredPassword);
+    }
 
 	//prints the account details in case necessary
 	public String toString() {

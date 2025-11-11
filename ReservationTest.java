@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Ryan Chan, lab sec L23
+ * @author zhu1220, chan531, lab sec L23
  * @version November 8, 2025
  */
 
@@ -82,6 +82,7 @@ public class ReservationTest {
 
         String s = res.toString();
         assertNotNull("toString() should not return null", s);
-        assertEquals("toString() should match expected format and content", "Reservation for JohnDoe @ 2025-11-10 18:30 for 2", s);
+        assertEquals("toString() should match expected format and content",
+                "Reservation for JohnDoe @ 2025-11-10 18:30 for 2", s);
     }
 }

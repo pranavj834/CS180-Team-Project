@@ -10,12 +10,13 @@ import java.awt.event.*;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Ryan Chan, lab sec L23
+ * @author chan531, lab sec L23
  * @version November 10, 2025
  */
 
 public class Screen extends JPanel implements ActionListener, ScreenInterface {
-    private Color background, text;
+    private Color background;
+    private Color text;
     private JButton testButton;
     private JTextField testField;
     private String testText;

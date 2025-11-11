@@ -5,7 +5,7 @@ import java.util.ArrayList;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Pranav Jasti, lab sec L23
+ * @author jastip, chan531, lab sec L23
  * @version November 8, 2025
  */
 
@@ -33,12 +33,8 @@ public class Reservation implements ReservationInterface {
 	//getters; returns the respective instance variables based on their respective inputs given
 	public String getName() { return name; }
 	public String getUsername() { return username; }
-	public String getDate() {
-		 return date;
-	}
-	public String getTime() {
-		return time;
-	}
+	public String getDate() { return date; }
+	public String getTime() { return time; }
 	public int getNumPeople() {
 		return numPeople;
 	}
