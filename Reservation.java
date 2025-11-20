@@ -31,33 +31,33 @@ public class Reservation implements ReservationInterface {
 	}
 
 	//getters; returns the respective instance variables based on their respective inputs given
-	public String getName() { return name; }
-	public String getUsername() { return username; }
-	public String getDate() { return date; }
-	public String getTime() { return time; }
-	public int getNumPeople() {
+	public synchronized String getName() { return name; }
+	public synchronized String getUsername() { return username; }
+	public synchronized String getDate() { return date; }
+	public synchronized String getTime() { return time; }
+	public synchronized int getNumPeople() {
 		return numPeople;
 	}
-	public ArrayList<Integer> getSeats() {
+	public synchronized ArrayList<Integer> getSeats() {
 		return seats;
 	}
 
 	//setters; sets the respective instance variables based on their respective inputs given
-	public void setName(String name) { this.name = name; }
-	public void setUsername(String username) { this.username = username; }
-	public void setDate(String date) {
+	public synchronized void setName(String name) { this.name = name; }
+	public synchronized void setUsername(String username) { this.username = username; }
+	public synchronized void setDate(String date) {
 		this.date = date;
 	}
-	public void setTime(String time) {
+	public synchronized void setTime(String time) {
 		this.time = time;
 	}
-	public void setNumPeople(int numPeople) {
+	public synchronized void setNumPeople(int numPeople) {
 		this.numPeople = numPeople;
 	}
-	public void setSeats(ArrayList<Integer> seats) { this.seats = seats; }
+	public synchronized void setSeats(ArrayList<Integer> seats) { this.seats = seats; }
 
 	@Override
-	public boolean equals(Object obj) {
+	public synchronized boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
