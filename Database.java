@@ -21,7 +21,7 @@ public class Database implements DatabaseInterface {
     }
 
     // adds account
-    public boolean addAccount(UserAccount account) {
+    public synchronized boolean addAccount(UserAccount account) {
         if (accounts.contains(account)) {
             return false;
         }
@@ -30,7 +30,7 @@ public class Database implements DatabaseInterface {
     }
 
     // adds reservation
-    public boolean addReservation(UserAccount account, Reservation reservation) {
+    public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
         for (Reservation r: reservations) {
             if (r.getDate().equals(reservation.getDate()) && r.getTime().equals(reservation.getTime())) {
                 return false;
@@ -48,7 +48,7 @@ public class Database implements DatabaseInterface {
     }
 
     // deletes account
-    public boolean deleteAccount(UserAccount account) {
+    public synchronized boolean deleteAccount(UserAccount account) {
         if (accounts.contains(account)) {
             for (Reservation r: account.getReservations()) {
                 // must remove all associated reservations with the account
@@ -61,7 +61,7 @@ public class Database implements DatabaseInterface {
     }
 
     // deletes reservation
-    public boolean deleteReservation(UserAccount account, Reservation reservation) {
+    public synchronized boolean deleteReservation(UserAccount account, Reservation reservation) {
         // fail if account doesn't exist
         int index = accounts.indexOf(account);
         if (index == -1) {
@@ -78,10 +78,10 @@ public class Database implements DatabaseInterface {
     }
 
     // getters
-    public ArrayList<UserAccount> getAccounts() {
+    public synchronized ArrayList<UserAccount> getAccounts() {
         return accounts;
     }
-    public ArrayList<Reservation> getReservations() {
+    public synchronized ArrayList<Reservation> getReservations() {
         return reservations;
     }
 
