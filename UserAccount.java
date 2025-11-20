@@ -28,33 +28,33 @@ public class UserAccount implements UserAccountInterface {
     }
 
 	//getter methods; gives the respective instance variable to the respective inputs given
-	public String getUsername() {
+	public synchronized String getUsername() {
 		return username;
 	}
-    public String getFullName() {
+    public synchronized String getFullName() {
     	return fullName;
     }
-    public String getEmail() {
+    public synchronized String getEmail() {
     	return email;
     }
-	public String getPassword() {
+	public synchronized String getPassword() {
 		return password;
 	}
-	public ArrayList<Reservation> getReservations() {
+	public synchronized ArrayList<Reservation> getReservations() {
 		return reservations;
 	}
 
 	//setter methods; sets the respective instance variable to the respective inputs given
-	public void setUsername(String username) {
+	public synchronized void setUsername(String username) {
     	this.username = username;
     }
-    public void setFullName(String fullName) {
+    public synchronized void setFullName(String fullName) {
     	this.fullName = fullName;
     }
-    public void setEmail(String email) {
+    public synchronized void setEmail(String email) {
     	this.email = email;
     }
-    public void setPassword(String password) {
+    public synchronized void setPassword(String password) {
     	this.password = password;
     }
 
@@ -63,17 +63,17 @@ public class UserAccount implements UserAccountInterface {
 
 
 	//books a reservation
-	public boolean addReservation(Reservation res) {
+	public synchronized boolean addReservation(Reservation res) {
 		return reservations.add(res);
 	}
 
 	//cancels a reservation
-	public boolean removeReservation(Reservation res) {
+	public synchronized boolean removeReservation(Reservation res) {
 		return reservations.remove(res);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public synchronized boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
