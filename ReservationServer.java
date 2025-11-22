@@ -1,25 +1,27 @@
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Core server-side logic for the restaurant reservation system.
  *
- * Holds shared state such as user accounts, reservations, hours of operation,
- * seating layout, and pricing rules. Provides thread-safe methods for handling
+ * Holds shared state such as user accounts, reservations, seating layout,
+ * and pricing rules. Provides thread-safe methods for handling
  * incoming CommunicationPacket requests.
- * * @author zhu1220, lab sec L23
- *  * @version November 8, 2025
- *  */
-
-public class ReservationServer implements ReservationServerInterface{
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author zhu1220, lab sec L23
+ * @version November 8, 2025
+ */
+public class ReservationServer implements ReservationServerInterface {
 
     // === Shared server state ===
     private final Database database;          // your existing Database (UserAccount + Reservation)
-    private DailyHours hours;                 // current hours of operation
-    private PriceRule priceRule;              // current pricing rule (optional / manager-only)
     private final Map<String, String> sessions; // sessionId -> username mapping
 
     /**
@@ -30,9 +32,8 @@ public class ReservationServer implements ReservationServerInterface{
         this.database = new Database();           // your in-memory DB (Phase 1)
         this.sessions = new HashMap<>();          // track active sessions
 
-        // TODO: load hours/layout/priceRule from files if you want persistence
-        this.hours = new DailyHours(LocalTime.of(11, 0), LocalTime.of(22, 0)); // example default
-        this.priceRule = null;                    // could set some defaults
+        // TODO: load pricing / reservations from files if you want persistence
+        // e.g., Reservation.configurePricing(savedBase, savedPerPerson);
     }
 
     /**
@@ -57,14 +58,6 @@ public class ReservationServer implements ReservationServerInterface{
                     break;
                 case LOGOUT:
                     handleLogout(req, res);
-                    break;
-
-                // ---------- HOURS ----------
-                case GET_HOURS:
-                    handleGetHours(req, res);
-                    break;
-                case SET_HOURS:
-                    handleSetHours(req, res);
                     break;
 
                 // ---------- SEATING / LAYOUT ----------
@@ -129,8 +122,8 @@ public class ReservationServer implements ReservationServerInterface{
         // TODO: check for duplicate usernames using your Database
 
         res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Registered (stub)");                // placeholder
-        res.setPayload("Registered user: " + username);      // payload message back to client
+                .setMessage("Registered (stub)");
+        res.setPayload("Registered user: " + username);
     }
 
     private synchronized void handleLogin(CommunicationPacket req, CommunicationPacket res) {
@@ -144,7 +137,7 @@ public class ReservationServer implements ReservationServerInterface{
         String sessionId = UUID.randomUUID().toString();
         sessions.put(sessionId, username);                  // track session
         res.setErrorCode(ErrorCode.NONE)
-                .setPayload(sessionId)                           // client expects sessionId in payload
+                .setPayload(sessionId)                      // client expects sessionId in payload
                 .setMessage("Login OK (stub)");
     }
 
@@ -155,25 +148,6 @@ public class ReservationServer implements ReservationServerInterface{
         }
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Logged out");
-    }
-
-    // ====================== HOURS HANDLERS ======================
-
-    private synchronized void handleGetHours(CommunicationPacket req, CommunicationPacket res) {
-        res.setErrorCode(ErrorCode.NONE)
-                .setPayload(hours)                               // send current DailyHours
-                .setMessage("Hours retrieved");
-    }
-
-    private synchronized void handleSetHours(CommunicationPacket req, CommunicationPacket res) {
-        // TODO: optionally check if this session corresponds to a manager
-        DailyHours newHours = (DailyHours) req.getPayload(); // new hours from client
-        this.hours = newHours;                               // update server-side hours
-
-        // TODO: persist to file if you want
-
-        res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Hours updated");
     }
 
     // ================== SEATING / LAYOUT HANDLERS ================== TODO: remove layout
@@ -192,21 +166,23 @@ public class ReservationServer implements ReservationServerInterface{
     // ================== BOOKING / AVAILABILITY HANDLERS ==================
 
     private synchronized void handleHoldSeats(CommunicationPacket req, CommunicationPacket res) {
-        Object[] arr = (Object[]) req.getPayload();         // [LocalDate, LocalTime, seatIds, ttlSeconds]
+        // [LocalDate, LocalTime, seatIds, ttlSeconds]
+        Object[] arr = (Object[]) req.getPayload();
         LocalDate date = (LocalDate) arr[0];
         LocalTime time = (LocalTime) arr[1];
         @SuppressWarnings("unchecked")
         List<String> seatIds = (List<String>) arr[2];
         long ttlSeconds = (long) arr[3];
 
-        // TODO: implement actual temporary hold logic
+        // TODO: implement actual temporary hold logic using (date, time, seatIds, ttlSeconds)
 
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Seats held for ~" + ttlSeconds + " seconds (stub)");
     }
 
     private synchronized void handleConfirmReservation(CommunicationPacket req, CommunicationPacket res) {
-        Object[] arr = (Object[]) req.getPayload();         // [LocalDate, LocalTime, seatIds, partySize]
+        // [LocalDate, LocalTime, seatIds, partySize]
+        Object[] arr = (Object[]) req.getPayload();
         LocalDate date = (LocalDate) arr[0];
         LocalTime time = (LocalTime) arr[1];
         @SuppressWarnings("unchecked")
@@ -222,32 +198,34 @@ public class ReservationServer implements ReservationServerInterface{
             return;
         }
 
-        // For Phase 1, we just build a Reservation that matches your
-        // existing Reservation(String date, String time, int numPeople, ArrayList<Integer> seats)
-
-        // Convert date/time to Strings (your Reservation uses String for these)
+        // Convert date/time to Strings (Reservation uses String for these)
         String dateString = date.toString();
         String timeString = time.toString();
 
-        // Stub: no real seat number mapping yet; just use an empty list or fill later
+        // Stub: convert seatIds to numeric seat numbers (or leave empty for now)
         ArrayList<Integer> seatNumbers = new ArrayList<>();
+        // TODO: real mapping from seatId -> seatNumber if needed
 
-        // Use your existing constructor
-        // TODO: FIX THIS CONSTRUCTOR
-        Reservation reservation = new Reservation("name", "username", dateString, timeString, partySize, seatNumbers
-        );
+        // For now, use username as "name" as well; you can add a real name field later
+        Reservation reservation = new Reservation(username, username, dateString, timeString, partySize, seatNumbers);
 
         // TODO: add to database structure (associate with this username)
+        // Example:
+        // UserAccount acct = database.getUser(username);
+        // if (acct != null) {
+        //     acct.addReservation(reservation);
+        // }
 
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(reservation)
-                .setMessage("Reservation confirmed (stub)");
+                .setMessage("Reservation confirmed");
     }
 
     private synchronized void handleCancelReservation(CommunicationPacket req, CommunicationPacket res) {
         String reservationId = (String) req.getPayload();
 
         // TODO: find and remove reservation by ID
+        // (Depends on how you identify reservations in your Database.)
 
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Reservation " + reservationId + " cancelled (stub)");
@@ -266,6 +244,12 @@ public class ReservationServer implements ReservationServerInterface{
         // TODO: query Database for all reservations belonging to this username.
         List<Reservation> myRes = new ArrayList<>();
 
+        // Example if Database supports it:
+        // UserAccount acct = database.getUser(username);
+        // if (acct != null) {
+        //     myRes = acct.getReservations();
+        // }
+
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(myRes)
                 .setMessage("Reservations retrieved (stub)");
@@ -274,27 +258,35 @@ public class ReservationServer implements ReservationServerInterface{
     // ====================== PRICING HANDLERS ======================
 
     private synchronized void handleQuotePrice(CommunicationPacket req, CommunicationPacket res) {
-        Object[] arr = (Object[]) req.getPayload();         // [seatIds, date, time, partySize]
-        @SuppressWarnings("unchecked")
-        List<String> seatIds = (List<String>) arr[0];
-        LocalDate date = (LocalDate) arr[1];
-        LocalTime time = (LocalTime) arr[2];
+        // [seatIds, LocalDate, LocalTime, partySize]
+        Object[] arr = (Object[]) req.getPayload();
+        // We ignore seatIds/date/time for now and just price by party size
         int partySize = (int) arr[3];
 
-        // TODO: use priceRule + seat info to compute price dynamically.
-        double price = 0.0; // stub
+        // Use Reservation's simple pricing rule
+        double price = Reservation.computePrice(partySize);
 
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(price)
-                .setMessage("Quote computed (stub)");
+                .setMessage("Quote computed");
     }
 
     private synchronized void handleSetPriceRule(CommunicationPacket req, CommunicationPacket res) {
-        // TODO: ensure only a manager session can call this.
-        PriceRule rule = (PriceRule) req.getPayload();
-        this.priceRule = rule;
+        // Payload: [Double basePrice, Double perPersonPrice]
+        Object payload = req.getPayload();
 
-        // TODO: persist rule if desired
+        if (!(payload instanceof Object[])) {
+            res.setErrorCode(ErrorCode.INVALID_INPUT)
+                    .setMessage("SET_PRICE_RULE payload must be Object[] [basePrice, perPersonPrice]");
+            return;
+        }
+
+        Object[] arr = (Object[]) payload;
+        double base = (double) arr[0];
+        double perPerson = (double) arr[1];
+
+        // Update global pricing config in Reservation
+        Reservation.configurePricing(base, perPerson);
 
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Price rule updated");
@@ -348,6 +340,6 @@ public class ReservationServer implements ReservationServerInterface{
 
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(balance)
-                .setMessage("Balance retrieved (stub)");
+                .setMessage("Balance retrieved");
     }
 }
