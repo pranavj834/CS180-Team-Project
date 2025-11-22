@@ -1,5 +1,5 @@
-import java.io.Serializable; // Import the Serializable interface so this class can be sent over Object streams
-import java.util.UUID;       // Import UUID to generate unique request IDs for each packet
+import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Serializable container used for all messages between client and server.
@@ -17,136 +17,88 @@ import java.util.UUID;       // Import UUID to generate unique request IDs for e
  * @author zhu1220, lab sec L23
  * @version November 8, 2025
  */
-public class CommunicationPacket implements Serializable { // Declare the class and indicate it can be serialized
-    private static final long serialVersionUID = 1L;       // Explicit serial version ID for serialization compatibility
+public class CommunicationPacket implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private String requestId = UUID.randomUUID().toString(); // Unique ID automatically generated for each packet instance
-    private PacketType packetType;                          // The type of request or response (e.g., LOGIN, GET_HOURS)
-    private Object payload;                                 // The data associated with this packet (generic Object)
-    private String sessionId;                               // Session identifier used to associate this packet with a user
-    private ErrorCode errorCode = ErrorCode.NONE;           // Error status; default is NONE meaning "no error"
-    private String message;                                 // Optional human-readable message (e.g., "Success" or error detail)
+    /** Unique ID automatically generated for each packet instance (useful for logging/debugging). */
+    private String requestId = UUID.randomUUID().toString();
 
-    /**
-     * Returns the unique request ID for this packet.
-     *
-     * @return request ID string
-     */
-    public String getRequestId() {          // Getter method for requestId field
-        return requestId;                   // Return the current value of requestId
+    /** The type of request/response (LOGIN, QUOTE_PRICE, etc.). */
+    private PacketType packetType;
+
+    /** Payload object (must be Serializable over the wire). */
+    private Object payload;
+
+    /** Session identifier used to associate this packet with a logged-in user. */
+    private String sessionId;
+
+    /** Error status; default is NONE meaning "no error". */
+    private ErrorCode errorCode = ErrorCode.NONE;
+
+    /** Optional human-readable message (e.g., "Success", or error detail). */
+    private String message;
+
+    // ==================== GETTERS ====================
+
+    public String getRequestId() {
+        return requestId;
     }
 
-    /**
-     * Returns the packet type.
-     *
-     * @return the PacketType for this packet
-     */
-    public PacketType getPacketType() {     // Getter method for packetType field
-        return packetType;                  // Return the current value of packetType
+    public PacketType getPacketType() {
+        return packetType;
     }
 
-    /**
-     * Returns the payload associated with this packet.
-     *
-     * @return the payload as an Object
-     */
-    public Object getPayload() {            // Getter method for payload field
-        return payload;                     // Return the current value of payload
+    public Object getPayload() {
+        return payload;
     }
 
-    /**
-     * Returns the session identifier attached to this packet.
-     *
-     * @return session ID string, or null if not set
-     */
-    public String getSessionId() {          // Getter method for sessionId field
-        return sessionId;                   // Return the current value of sessionId
+    public String getSessionId() {
+        return sessionId;
     }
 
-    /**
-     * Returns the error code for this packet.
-     *
-     * @return error code; ErrorCode.NONE means no error
-     */
-    public ErrorCode getErrorCode() {       // Getter method for errorCode field
-        return errorCode;                   // Return the current value of errorCode
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 
-    /**
-     * Returns the message attached to this packet.
-     *
-     * @return message text, or null if no message was set
-     */
-    public String getMessage() {            // Getter method for message field
-        return message;                     // Return the current value of message
+    public String getMessage() {
+        return message;
     }
 
-    /**
-     * Sets the packet type for this packet.
-     *
-     * @param packetType type of operation (e.g., LOGIN, GET_OPEN_SEATS)
-     * @return this CommunicationPacket instance (for method chaining)
-     */
-    public CommunicationPacket setPacketType(PacketType packetType) { // Setter method for packetType with fluent return
-        this.packetType = packetType;       // Assign the provided packetType to the field
-        return this;                        // Return this instance to allow chaining calls
+    // ==================== FLUENT SETTERS ====================
+
+    public CommunicationPacket setPacketType(PacketType packetType) {
+        this.packetType = packetType;
+        return this;
     }
 
-    /**
-     * Sets the payload object for this packet.
-     *
-     * @param payload payload data to attach (must be Serializable on the wire)
-     * @return this CommunicationPacket instance (for method chaining)
-     */
-    public CommunicationPacket setPayload(Object payload) { // Setter method for payload with fluent return
-        this.payload = payload;             // Assign the provided payload object to the field
-        return this;                        // Return this instance to allow chaining calls
+    public CommunicationPacket setPayload(Object payload) {
+        this.payload = payload;
+        return this;
     }
 
-    /**
-     * Sets the session ID for this packet.
-     *
-     * @param sessionId session identifier issued by the server after login
-     * @return this CommunicationPacket instance (for method chaining)
-     */
-    public CommunicationPacket setSessionId(String sessionId) { // Setter method for sessionId with fluent return
-        this.sessionId = sessionId;         // Assign the provided sessionId string to the field
-        return this;                        // Return this instance to allow chaining calls
+    public CommunicationPacket setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
     }
 
-    /**
-     * Sets the error code for this packet.
-     *
-     * @param errorCode error status to attach
-     * @return this CommunicationPacket instance (for method chaining)
-     */
-    public CommunicationPacket setErrorCode(ErrorCode errorCode) { // Setter method for errorCode with fluent return
-        this.errorCode = errorCode;         // Assign the provided errorCode value to the field
-        return this;                        // Return this instance to allow chaining calls
+    public CommunicationPacket setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+        return this;
     }
 
-    /**
-     * Sets the message text for this packet.
-     *
-     * @param message descriptive message (success text or error detail)
-     * @return this CommunicationPacket instance (for method chaining)
-     */
-    public CommunicationPacket setMessage(String message) { // Setter method for message with fluent return
-        this.message = message;             // Assign the provided message string to the field
-        return this;                        // Return this instance to allow chaining calls
+    public CommunicationPacket setMessage(String message) {
+        this.message = message;
+        return this;
     }
 
-    /**
-     * Returns a concise string representation of the packet, useful for logging.
-     *
-     * @return formatted string showing type, requestId, and errorCode
-     */
+    // ==================== DEBUG STRING ====================
+
     @Override
-    public String toString() {              // Override of Object.toString() for debugging/logging purposes
-        return "Packet{" +                 // Start building a string with the word "Packet{"
-                packetType +               // Append the current packetType
-                ", req=" + requestId +     // Append the request ID with a label
-                ", err=" + errorCode +     // Append the error code with a label
-                "}";                       // Close the brace and finish the string
+    public String toString() {
+        return "Packet{" +
+                packetType +
+                ", req=" + requestId +
+                ", err=" + errorCode +
+                "}";
     }
 }
