@@ -46,7 +46,7 @@ public class ClientAPI {
      */
     public ClientAPI(ClientConnection conn, ClientCache cache) {
         this.conn = conn;         // save connection
-        this.cache = cache;       // save cache
+        this.cache = new ClientCache();       // save cache
     }
 
     // ============================================================
