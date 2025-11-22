@@ -7,49 +7,44 @@ import java.io.IOException;
  *
  * <p>This class is responsible for:</p>
  * <ul>
- *     <li>Creating a {@link ClientConnection} and connecting to the server.</li>
- *     <li>Creating the high-level {@link ClientAPI} wrapper around the connection.</li>
- *     <li>Launching the Swing GUI (currently the {@link Screen} panel).</li>
+ *     <li>Connecting to the reservation server.</li>
+ *     <li>Creating the high-level {@link ClientAPI} wrapper.</li>
+ *     <li>Launching the GUI (the {@link Screen}).</li>
  * </ul>
+ *
+ * <p>Time and date are handled as simple Strings instead of LocalTime/LocalDate.</p>
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author zhu1220, lab sec L23
+ * author zhu1220
  * @version November 20, 2025
  */
 public class ClientMain {
 
-    /** Hostname or IP of the server. For local testing this is localhost. */
     private static final String HOST = "localhost";
+    private static final int PORT = 500;
 
-    /** Port number the server is listening on (must match ServerMain). */
-    private static final int PORT = 5000;
-
-    /**
-     * Starts the client, connects to the server, and opens the GUI.
-     *
-     * @param args command-line arguments (unused)
-     */
     public static void main(String[] args) {
         try {
-            // 1. Set up low-level connection to the server
+            // 1. Open connection to server
             ClientConnection conn = new ClientConnection();
             conn.connect(HOST, PORT);
 
-            // 2. Create the high-level API wrapper (no ClientCache / Session anymore)
-            ClientAPI api = new ClientAPI(conn);
+            // 2. Build cache + API wrapper
+            ClientCache cache = new ClientCache();
+            ClientAPI api = new ClientAPI(conn, cache);
 
-            // 3. Launch the GUI on the Swing event dispatch thread
-            SwingUtilities.invokeLater(() -> { // Swing-thread safety method.
+            // 3. Launch GUI
+            SwingUtilities.invokeLater(() -> {
                 JFrame frame = new JFrame("Restaurant Reservation Client");
 
-                // If when Screen needs the API, change this to new Screen(api)
+                // TODO: update Screen constructor when you want to pass api.
                 Screen screen = new Screen();
-                frame.setContentPane(screen);
 
+                frame.setContentPane(screen);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
-                frame.setLocationRelativeTo(null); // center on screen
+                frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
             });
 
