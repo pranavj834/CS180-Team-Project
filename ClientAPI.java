@@ -1,7 +1,4 @@
 import java.time.Duration;          // For representing how long seat holds last
-import java.time.LocalDate;         // For reservation dates
-import java.time.LocalDateTime;     // For date+time keys in cache
-import java.time.LocalTime;         // For reservation times
 import java.util.List;              // For lists of seats/reservations
 
 /**
