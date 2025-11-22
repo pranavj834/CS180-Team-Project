@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  * @version November 10, 2025
  */
 
-public class Database implements DatabaseInterface {
+public class Database implements DatabaseInterface, Serializable {
     private ArrayList<UserAccount> accounts;
     private ArrayList<Reservation> reservations;
 
@@ -83,6 +84,26 @@ public class Database implements DatabaseInterface {
     }
     public synchronized ArrayList<Reservation> getReservations() {
         return reservations;
+    }
+
+    public synchronized void writeToFile() {
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("database.txt"));
+            oos.writeObject(accounts);
+            oos.writeObject(reservations);
+            oos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public synchronized void readFromFile() {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("database.txt"));
+            accounts = (ArrayList<UserAccount>) ois.readObject();
+            reservations = (ArrayList<Reservation>) ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String toString() {

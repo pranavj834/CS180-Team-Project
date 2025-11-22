@@ -20,11 +20,19 @@ public class UserAccount implements UserAccountInterface {
 
 	//constructor; sets all the details of the account like username and password to the given inputs in the parameters
 	public UserAccount(String username, String password, String fullName, String email) {
-        this.username = username;
-        this.password = password;
-        this.fullName = fullName;
-        this.email = email;
-		reservations = new ArrayList<>();
+        if (!username.equals("") && !username.equals("null")) {
+            this.username = username;
+        }
+        if (!password.equals("") && !password.equals("null")) {
+            this.password = password;
+        }
+        if (!fullName.equals("") && !fullName.equals("null")) {
+            this.fullName = fullName;
+        }
+        if (!email.equals("") && !email.equals("null")) {
+            this.email = email;
+        }
+        this.reservations = new ArrayList<>();
     }
 
 	//getter methods; gives the respective instance variable to the respective inputs given
