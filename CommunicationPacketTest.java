@@ -1,28 +1,39 @@
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-/**
- * Tests for the CommunicationPacket class.
- * @author zhu1220, lab sec L23
- * @version November 8, 2025
- */
+import static org.junit.Assert.*;
 
 public class CommunicationPacketTest {
 
-    @Test(timeout = 1000)
-    public void testSettersAndGetters() {
-        CommunicationPacket p = new CommunicationPacket()
+    @Test
+    public void testFluentSettersStoreValuesCorrectly() {
+        CommunicationPacket packet = new CommunicationPacket()
                 .setPacketType(PacketType.LOGIN)
-                .setPayload(new String[]{"user", "pw"})
+                .setPayload("payload")
                 .setSessionId("session-123")
-                .setErrorCode(ErrorCode.NONE)
-                .setMessage("OK");
+                .setErrorCode(ErrorCode.INVALID_INPUT)
+                .setMessage("Bad input");
 
-        assertEquals(PacketType.LOGIN, p.getPacketType());
-        assertArrayEquals(new String[]{"user", "pw"}, (String[]) p.getPayload());
-        assertEquals("session-123", p.getSessionId());
-        assertEquals(ErrorCode.NONE, p.getErrorCode());
-        assertEquals("OK", p.getMessage());
-        assertNotNull("requestId should be auto-generated", p.getRequestId());
+        assertEquals(PacketType.LOGIN, packet.getPacketType());
+        assertEquals("payload", packet.getPayload());
+        assertEquals("session-123", packet.getSessionId());
+        assertEquals(ErrorCode.INVALID_INPUT, packet.getErrorCode());
+        assertEquals("Bad input", packet.getMessage());
+    }
+
+    @Test
+    public void testRequestIdIsNotNullAndUnique() {
+        CommunicationPacket p1 = new CommunicationPacket();
+        CommunicationPacket p2 = new CommunicationPacket();
+
+        assertNotNull(p1.getRequestId());
+        assertNotNull(p2.getRequestId());
+        assertNotEquals("Each packet should have a unique requestId",
+                p1.getRequestId(), p2.getRequestId());
+    }
+
+    @Test
+    public void testDefaultErrorCodeIsNone() {
+        CommunicationPacket packet = new CommunicationPacket();
+        assertEquals(ErrorCode.NONE, packet.getErrorCode());
     }
 }
