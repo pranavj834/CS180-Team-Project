@@ -1,52 +1,96 @@
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * Spot tests for PacketFactory to verify packetType and payload shapes.
- * @author zhu1220, lab sec L23
- * @version November 8, 2025
- */
+import static org.junit.Assert.*;
 
 public class PacketFactoryTest {
 
-    @Test(timeout = 1000)
+    @Test
     public void testRegisterPacket() {
-        CommunicationPacket p = PacketFactory.register("alice", "pw");
+        CommunicationPacket p = PacketFactory.register("user", "pass");
+
         assertEquals(PacketType.REGISTER, p.getPacketType());
-        assertArrayEquals(new String[]{"alice", "pw"}, (String[]) p.getPayload());
+        assertTrue(p.getPayload() instanceof String[]);
+
+        String[] creds = (String[]) p.getPayload();
+        assertEquals("user", creds[0]);
+        assertEquals("pass", creds[1]);
     }
 
-    @Test(timeout = 1000)
-    public void testGetOpenSeatsPacket() {
-        LocalDate d = LocalDate.of(2025, 11, 10);
-        LocalTime t = LocalTime.of(18, 30);
+    @Test
+    public void testLoginPacket() {
+        CommunicationPacket p = PacketFactory.login("alice", "secret");
 
-        CommunicationPacket p = PacketFactory.getOpenSeats(d, t, 4);
-        assertEquals(PacketType.GET_OPEN_SEATS, p.getPacketType());
+        assertEquals(PacketType.LOGIN, p.getPacketType());
+        assertTrue(p.getPayload() instanceof String[]);
 
-        Object[] payload = (Object[]) p.getPayload();
-        assertEquals(d, payload[0]);
-        assertEquals(t, payload[1]);
-        assertEquals(4, payload[2]);
+        String[] creds = (String[]) p.getPayload();
+        assertEquals("alice", creds[0]);
+        assertEquals("secret", creds[1]);
     }
 
-    @Test(timeout = 1000)
-    public void testConfirmReservationPacket() {
-        LocalDate d = LocalDate.of(2025, 11, 10);
-        LocalTime t = LocalTime.of(18, 30);
+    @Test
+    public void testQuotePricePacketPayloadShape() {
+        List<String> seats = Arrays.asList("A1", "A2");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        LocalTime time = LocalTime.of(18, 30);
+        int partySize = 4;
 
-        CommunicationPacket p = PacketFactory.confirmReservation(
-                d, t, Arrays.asList("T1", "T2"), 4);
+        CommunicationPacket p = PacketFactory.quotePrice(seats, date, time, partySize);
 
-        assertEquals(PacketType.CONFIRM_RESERVATION, p.getPacketType());
+        assertEquals(PacketType.QUOTE_PRICE, p.getPacketType());
+        assertTrue(p.getPayload() instanceof Object[]);
 
-        Object[] payload = (Object[]) p.getPayload();
-        assertEquals(d, payload[0]);
-        assertEquals(t, payload[1]);
-        assertEquals(Arrays.asList("T1", "T2"), payload[2]);
-        assertEquals(4, payload[3]);
+        Object[] arr = (Object[]) p.getPayload();
+        assertEquals(4, arr.length);
+
+        assertSame(seats, arr[0]);
+        assertEquals(date, arr[1]);
+        assertEquals(time, arr[2]);
+        assertEquals(partySize, arr[3]);
+    }
+
+    @Test
+    public void testSetPriceRulePacketPayload() {
+        double base = 10.0;
+        double perPerson = 2.5;
+
+        CommunicationPacket p = PacketFactory.setPriceRule(base, perPerson);
+
+        assertEquals(PacketType.SET_PRICE_RULE, p.getPacketType());
+        assertTrue(p.getPayload() instanceof Object[]);
+
+        Object[] arr = (Object[]) p.getPayload();
+        assertEquals(2, arr.length);
+        assertEquals(base, (double) arr[0], 0.0001);
+        assertEquals(perPerson, (double) arr[1], 0.0001);
+    }
+
+    @Test
+    public void testHoldSeatsPacketEncodesDurationAsSeconds() {
+        List<String> seats = Collections.singletonList("B1");
+        LocalDate date = LocalDate.of(2025, 5, 10);
+        LocalTime time = LocalTime.of(19, 0);
+        Duration ttl = Duration.ofMinutes(15);
+
+        CommunicationPacket p = PacketFactory.holdSeats(date, time, seats, ttl);
+
+        assertEquals(PacketType.HOLD_SEATS, p.getPacketType());
+        assertTrue(p.getPayload() instanceof Object[]);
+
+        Object[] arr = (Object[]) p.getPayload();
+        assertEquals(4, arr.length);
+        assertEquals(date, arr[0]);
+        assertEquals(time, arr[1]);
+        assertSame(seats, arr[2]);
+
+        long seconds = (long) arr[3];
+        assertEquals(ttl.toSeconds(), seconds);
     }
 }
