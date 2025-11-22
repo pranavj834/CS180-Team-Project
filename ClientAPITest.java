@@ -1,211 +1,317 @@
-//import org.junit.Test;
-//import static org.junit.Assert.*;
-//
-//import java.io.IOException;
-//import java.time.Duration;
-//import java.time.LocalDate;
-//import java.time.LocalTime;
-//import java.util.*;
-//
-///**
-// * Tests for the ClientAPI class.
-// *
-// * <p>Purdue University -- CS18000 -- Fall 2025</p>
-// *
-// * @author zhu1220, lab sec L23
-// * @version November 8, 2025
-// */
-//public class ClientAPITest {
-//
-//    /**
-//     * Simple fake connection that returns queued responses instead of
-//     * talking to a real server.
-//     */
-//    private static class FakeConnection extends ClientConnection {
-//        CommunicationPacket lastRequest;
-//        Queue<CommunicationPacket> responses = new ArrayDeque<>();
-//
-//        void addResponse(CommunicationPacket res) {
-//            responses.add(res);
-//        }
-//
-//        @Override
-//        public CommunicationPacket send(CommunicationPacket req) throws IOException {
-//            this.lastRequest = req;
-//            if (responses.isEmpty()) {
-//                CommunicationPacket err = new CommunicationPacket();
-//                err.setErrorCode(ErrorCode.INTERNAL_ERROR)
-//                        .setMessage("No stubbed response");
-//                return err;
-//            }
-//            return responses.remove();
-//        }
-//    }
-//
-//    /** Helper: build a success packet with given payload. */
-//    private CommunicationPacket ok(Object payload) {
-//        return new CommunicationPacket()
-//                .setErrorCode(ErrorCode.NONE)
-//                .setPayload(payload);
-//    }
-//
-//    /** Helper: build an error packet with a specific code. */
-//    private CommunicationPacket err(ErrorCode code, String msg) {
-//        return new CommunicationPacket()
-//                .setErrorCode(code)
-//                .setMessage(msg);
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testRegisterSuccess() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(ok("Success!"));
-//        ClientCache cache = new ClientCache();
-//        Session session = new Session();
-//        ClientAPI api = new ClientAPI(conn, cache, session);
-//
-//        String result = api.register("alice", "pw123");
-//
-//        assertEquals("Success!", result);
-//        assertEquals(PacketType.REGISTER, conn.lastRequest.getPacketType());
-//    }
-//
-//    @Test(timeout = 1000, expected = IllegalStateException.class)
-//    public void testRegisterErrorThrows() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(err(ErrorCode.CONFLICT, "Username taken"));
-//        ClientAPI api = new ClientAPI(conn, new ClientCache(), new Session());
-//
-//        api.register("alice", "pw123"); // should throw
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testLoginSuccessSetsSession() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(ok("session-123"));
-//        ClientCache cache = new ClientCache();
-//        Session session = new Session();
-//        ClientAPI api = new ClientAPI(conn, cache, session);
-//
-//        boolean ok = api.login("alice", "pw123");
-//
-//        assertTrue(ok);
-//        assertEquals("session-123", conn.getSessionId());
-//        assertEquals("session-123", session.getSessionId());
-//        assertEquals("alice", session.getUsername());
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testLoginFailureReturnsFalse() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(err(ErrorCode.AUTH_FAILED, "Bad login"));
-//        ClientAPI api = new ClientAPI(conn, new ClientCache(), new Session());
-//
-//        boolean ok = api.login("alice", "badpw");
-//
-//        assertFalse(ok);
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testLogoutClearsSession() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.setSessionId("session-123");
-//        conn.addResponse(ok("Logged out"));
-//        Session session = new Session();
-//        session.set("alice", "session-123", false);
-//
-//        ClientAPI api = new ClientAPI(conn, new ClientCache(), session);
-//
-//        api.logout();
-//
-//        assertNull(conn.getSessionId());
-//        assertFalse(session.isLoggedIn());
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testGetHoursUsesCache() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        DailyHours hours = new DailyHours(
-//                LocalTime.of(11, 0),
-//                LocalTime.of(22, 0));
-//        conn.addResponse(ok(hours));
-//
-//        ClientCache cache = new ClientCache();
-//        ClientAPI api = new ClientAPI(conn, cache, new Session());
-//
-//        // first call hits fake server
-//        DailyHours h1 = api.getHours();
-//        // second call should come from cache; no extra responses queued
-//        DailyHours h2 = api.getHours();
-//
-//        assertSame(hours, h1);
-//        assertSame(h1, h2);
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testSetHoursUpdatesCache() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(ok("Updated"));
-//
-//        ClientCache cache = new ClientCache();
-//        ClientAPI api = new ClientAPI(conn, cache, new Session());
-//
-//        DailyHours newHours = new DailyHours(
-//                LocalTime.of(10, 0),
-//                LocalTime.of(23, 0));
-//
-//        api.setHours(newHours);
-//
-//        assertEquals(newHours, cache.getHours());
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testGetSeatingLayoutCaching() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        SeatingLayout layout = new SeatingLayout(
-//                Collections.singletonList(new Seat("T1", 4, false)));
-//        conn.addResponse(ok(layout));
-//
-//        ClientCache cache = new ClientCache();
-//        ClientAPI api = new ClientAPI(conn, cache, new Session());
-//
-//        SeatingLayout l1 = api.getSeatingLayout();
-//        SeatingLayout l2 = api.getSeatingLayout(); // from cache
-//
-//        assertSame(layout, l1);
-//        assertSame(l1, l2);
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testLockSectionInvalidatesLayout() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        conn.addResponse(ok("Locked"));
-//
-//        ClientCache cache = new ClientCache();
-//        cache.setLayout(new SeatingLayout(Collections.emptyList()));
-//        ClientAPI api = new ClientAPI(conn, cache, new Session());
-//
-//        api.lockSection("MAIN", true);
-//
-//        assertNull("Layout cache should be cleared after lockSection",
-//                cache.getLayout());
-//    }
-//
-//    @Test(timeout = 1000)
-//    public void testGetOpenSeatsCachesByTimeslot() throws Exception {
-//        FakeConnection conn = new FakeConnection();
-//        List<String> seats = Arrays.asList("T1", "T2");
-//        conn.addResponse(ok(seats));
-//
-//        ClientCache cache = new ClientCache();
-//        ClientAPI api = new ClientAPI(conn, cache, new Session());
-//
-//        LocalDate d = LocalDate.of(2025, 11, 10);
-//        LocalTime t = LocalTime.of(18, 30);
-//
-//        List<String> result = api.getOpenSeats(d, t, 4);
-//
-//        assertEquals(seats, result);
-//
-//        // check that something got cached for that slot
-//        assertFalse(cache.getOpe
+import org.junit.Before;
+import org.junit.Test;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
+
+import static org.junit.Assert.*;
+
+/**
+ * Unit tests for ClientAPI using a stubbed ClientConnection.
+ */
+public class ClientAPITest {
+
+    private FakeClientConnection conn;
+    private ClientCache cache;
+    private ClientAPI api;
+
+    @Before
+    public void setup() {
+        conn = new FakeClientConnection();
+        cache = new ClientCache();
+        api = new ClientAPI(conn, cache);
+    }
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+
+    @Test
+    public void testRegisterSuccess() throws Exception {
+        conn.nextResponse = ok("Registered OK");
+
+        String msg = api.register("alice", "pw");
+        assertEquals("Registered OK", msg);
+
+        assertEquals(PacketType.REGISTER, conn.lastSent.getPacketType());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRegisterFailureThrows() throws Exception {
+        conn.nextResponse = error(ErrorCode.INVALID_INPUT, "bad");
+
+        api.register("bob", "pw"); // Should throw
+    }
+
+    @Test
+    public void testLoginSuccessStoresSessionId() throws Exception {
+        conn.nextResponse = okPayload("session123");
+
+        boolean ok = api.login("user", "pw");
+        assertTrue(ok);
+
+        assertEquals("session123", conn.getSessionId());
+    }
+
+    @Test
+    public void testLoginFailureReturnsFalse() throws Exception {
+        conn.nextResponse = error(ErrorCode.AUTH_FAILED, "wrong");
+
+        boolean ok = api.login("user", "pw");
+        assertFalse(ok);
+    }
+
+    @Test
+    public void testLogoutClearsSessionId() throws Exception {
+        conn.setSessionId("session123");
+        conn.nextResponse = ok("done");
+
+        api.logout();
+
+        assertNull(conn.getSessionId());
+    }
+
+    // ============================================================
+    // BOOKING / AVAILABILITY
+    // ============================================================
+
+    @Test
+    public void testGetOpenSeatsUpdatesCache() throws Exception {
+        List<String> serverSeats = Arrays.asList("A1", "A2");
+
+        conn.nextResponse = okPayload(serverSeats);
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        LocalTime time = LocalTime.of(17, 0);
+
+        List<String> seats = api.getOpenSeats(date, time, 2);
+
+        assertEquals(serverSeats, seats);
+
+        // Confirm cached
+        assertEquals(serverSeats, cache.getOpenSeats(LocalDateTime.of(date, time)));
+    }
+
+    @Test
+    public void testHoldSeatsSuccess() throws Exception {
+        conn.nextResponse = ok("held");
+
+        boolean held = api.holdSeats(
+                LocalDate.of(2025, 1, 1),
+                LocalTime.of(18, 0),
+                Arrays.asList("A1"),
+                Duration.ofSeconds(20)
+        );
+
+        assertTrue(held);
+        assertEquals(PacketType.HOLD_SEATS, conn.lastSent.getPacketType());
+    }
+
+    @Test
+    public void testHoldSeatsFailureReturnsFalse() throws Exception {
+        conn.nextResponse = error(ErrorCode.CONFLICT, "taken");
+
+        boolean held = api.holdSeats(
+                LocalDate.of(2025, 1, 1),
+                LocalTime.of(18, 0),
+                Arrays.asList("A1"),
+                Duration.ofSeconds(20)
+        );
+
+        assertFalse(held);
+    }
+
+    @Test
+    public void testConfirmReservationReturnsReservation() throws Exception {
+        Reservation r = new Reservation("John", "j", "2025-05-01", "18:00",
+                2, new ArrayList<>());
+
+        conn.nextResponse = okPayload(r);
+
+        Reservation returned = api.confirmReservation(
+                LocalDate.of(2025, 5, 1),
+                LocalTime.of(18, 0),
+                Arrays.asList("T1"),
+                2
+        );
+
+        assertEquals(r, returned);
+    }
+
+    @Test
+    public void testCancelReservationSuccess() throws Exception {
+        conn.nextResponse = ok("deleted");
+
+        boolean ok = api.cancelReservation("R1");
+
+        assertTrue(ok);
+    }
+
+    @Test
+    public void testCancelReservationFailure() throws Exception {
+        conn.nextResponse = error(ErrorCode.NOT_FOUND, "nope");
+
+        boolean ok = api.cancelReservation("R1");
+
+        assertFalse(ok);
+    }
+
+    @Test
+    public void testGetReservationsStoresInCache() throws Exception {
+        Reservation r1 = new Reservation("A", "a", "2025", "12:00",
+                1, new ArrayList<>());
+        Reservation r2 = new Reservation("B", "b", "2025", "12:30",
+                2, new ArrayList<>());
+
+        List<Reservation> list = Arrays.asList(r1, r2);
+
+        conn.nextResponse = okPayload(list);
+
+        List<Reservation> out = api.getReservations();
+
+        assertEquals(list, out);
+        assertEquals(list, cache.getMyReservations());
+    }
+
+    // ============================================================
+    // PRICING
+    // ============================================================
+
+    @Test
+    public void testQuotePriceReturnsDouble() throws Exception {
+        conn.nextResponse = okPayload(25.0);
+
+        double price = api.quote(
+                Arrays.asList("A1"),
+                LocalDate.of(2025, 2, 1),
+                LocalTime.of(19, 0),
+                3
+        );
+
+        assertEquals(25.0, price, 0.0001);
+        assertEquals(PacketType.QUOTE_PRICE, conn.lastSent.getPacketType());
+    }
+
+    @Test
+    public void testSetPriceRuleSuccess() throws Exception {
+        conn.nextResponse = ok("done");
+
+        api.setPriceRule(10.0, 2.0);
+
+        assertEquals(PacketType.SET_PRICE_RULE, conn.lastSent.getPacketType());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testSetPriceRuleFailureThrows() throws Exception {
+        conn.nextResponse = error(ErrorCode.INVALID_INPUT, "bad rule");
+
+        api.setPriceRule(10, -2);
+    }
+
+    // ============================================================
+    // PAYMENT
+    // ============================================================
+
+    @Test
+    public void testDepositUpdatesCacheBalance() throws Exception {
+        conn.nextResponse = ok("ok");         // Response to deposit
+        conn.nextBalance = 50.0;              // Response to getBalance()
+
+        api.deposit(20.0);
+
+        assertEquals(50.0, cache.getWalletBalance(), 0.0001);
+    }
+
+    @Test
+    public void testWithdrawSuccessUpdatesCache() throws Exception {
+        conn.nextResponse = ok("ok");         // Response to withdraw
+        conn.nextBalance = 30.0;              // Response to getBalance()
+
+        boolean ok = api.withdraw(10);
+
+        assertTrue(ok);
+        assertEquals(30.0, cache.getWalletBalance(), 0.0001);
+    }
+
+    @Test
+    public void testWithdrawFailureReturnsFalse() throws Exception {
+        conn.nextResponse = error(ErrorCode.INSUFFICIENT_FUNDS, "no");
+
+        boolean ok = api.withdraw(10);
+
+        assertFalse(ok);
+    }
+
+    @Test
+    public void testGetBalanceUpdatesCache() throws Exception {
+        conn.nextResponse = okPayload(88.0);
+
+        double bal = api.getBalance();
+
+        assertEquals(88.0, bal, 0.0001);
+        assertEquals(88.0, cache.getWalletBalance(), 0.0001);
+    }
+
+    // ============================================================
+    // ==== FakeClientConnection (stubbed networking layer) =====
+    // ============================================================
+
+    /**
+     * A minimal fake connection used for testing client logic
+     * without real networking or a running server.
+     */
+    private static class FakeClientConnection extends ClientConnection {
+
+        CommunicationPacket nextResponse;
+        CommunicationPacket lastSent;
+        Double nextBalance = null;
+        private String sessionId;
+
+        @Override
+        public CommunicationPacket send(CommunicationPacket p) {
+            this.lastSent = p;
+
+            // Special case for getBalance
+            if (p.getPacketType() == PacketType.GET_BALANCE && nextBalance != null) {
+                return okPayload(nextBalance);
+            }
+
+            return nextResponse;
+        }
+
+        @Override
+        public void setSessionId(String id) {
+            this.sessionId = id;
+        }
+
+        @Override
+        public String getSessionId() {
+            return sessionId;
+        }
+    }
+
+    // ============================================================
+    // ==== Convenience static helpers
+    // ============================================================
+
+    private static CommunicationPacket ok(String msg) {
+        return new CommunicationPacket()
+                .setErrorCode(ErrorCode.NONE)
+                .setMessage(msg);
+    }
+
+    private static CommunicationPacket okPayload(Object payload) {
+        return new CommunicationPacket()
+                .setErrorCode(ErrorCode.NONE)
+                .setPayload(payload)
+                .setMessage("OK");
+    }
+
+    private static CommunicationPacket error(ErrorCode code, String msg) {
+        return new CommunicationPacket()
+                .setErrorCode(code)
+                .setMessage(msg);
+    }
+}
