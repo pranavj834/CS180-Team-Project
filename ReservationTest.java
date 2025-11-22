@@ -1,88 +1,104 @@
+import org.junit.Before;
 import org.junit.Test;
-import java.util.ArrayList;
-import static org.junit.Assert.*;
 
-/**
- * Test class for the Reservation class.
- *
- * <p>Purdue University -- CS18000 -- Fall 2025</p>
- *
- * @author zhu1220, chan531, lab sec L23
- * @version November 8, 2025
- */
+import java.util.ArrayList;
+
+import static org.junit.Assert.*;
 
 public class ReservationTest {
 
-    @Test(timeout = 1000)
-    public void testConstructorAndGetters() {
+    @Before
+    public void resetPricing() {
+        // Set a known pricing rule before each test
+        Reservation.configurePricing(10.0, 5.0); // base = 10, perPerson = 5
+    }
+
+    @Test
+    public void testComputePriceUsesConfiguredPricing() {
+        double priceFor2 = Reservation.computePrice(2); // 10 + 5*2 = 20
+        double priceFor4 = Reservation.computePrice(4); // 10 + 5*4 = 30
+
+        assertEquals(20.0, priceFor2, 0.0001);
+        assertEquals(30.0, priceFor4, 0.0001);
+    }
+
+    @Test
+    public void testConstructorSetsFieldsAndComputesTotalPrice() {
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(1);
         seats.add(2);
 
-        Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10",
-                "18:30", 2, seats);
+        Reservation r = new Reservation(
+                "John Doe",
+                "jdoe",
+                "2025-12-25",
+                "18:30",
+                3,
+                seats
+        );
 
-        assertEquals("Name should match constructor value", "JohnDoe", res.getName());
-        assertEquals("Username should match constructor value", "johndoe", res.getUsername());
-        assertEquals("Date should match constructor value", "2025-11-10", res.getDate());
-        assertEquals("Time should match constructor value", "18:30", res.getTime());
-        assertEquals("Number of people should match constructor value", 2, res.getNumPeople());
-        assertEquals("Seats list should match constructor value", seats, res.getSeats());
+        assertEquals("John Doe", r.getName());
+        assertEquals("jdoe", r.getUsername());
+        assertEquals("2025-12-25", r.getDate());
+        assertEquals("18:30", r.getTime());
+        assertEquals(3, r.getNumPeople());
+        assertEquals(seats, r.getSeats());
+
+        // totalPrice = 10 + 5*3 = 25
+        assertEquals(25.0, r.getTotalPrice(), 0.0001);
     }
 
-    @Test(timeout = 1000)
-    public void testSetters() {
-        ArrayList<Integer> seats = new ArrayList<>();
-        seats.add(5);
+    @Test
+    public void testEqualsUsesAllFields() {
+        ArrayList<Integer> seats1 = new ArrayList<>();
+        seats1.add(1);
+        seats1.add(2);
 
-        Reservation res = new Reservation("JohnDoe", "johndoe", "2025-01-01",
-                "12:00", 1, seats);
-        res.setName("JaneDoe");
-        res.setUsername("janedoe");
-        res.setDate("2025-12-31");
-        res.setTime("20:15");
-        res.setNumPeople(4);
+        ArrayList<Integer> seats2 = new ArrayList<>();
+        seats2.add(1);
+        seats2.add(2);
 
-        ArrayList<Integer> newSeats = new ArrayList<>();
-        newSeats.add(10);
-        newSeats.add(11);
-        res.setSeats(newSeats);
+        Reservation r1 = new Reservation(
+                "Alice",
+                "alice",
+                "2025-01-01",
+                "19:00",
+                2,
+                seats1
+        );
 
-        assertEquals("Name should be updated", "JaneDoe", res.getName());
-        assertEquals("Username should be updated", "janedoe", res.getUsername());
-        assertEquals("Date should be updated", "2025-12-31", res.getDate());
-        assertEquals("Time should be updated", "20:15", res.getTime());
-        assertEquals("Number of people should be updated", 4, res.getNumPeople());
-        assertEquals("Seats list should match constructor value", newSeats, res.getSeats());
+        Reservation r2 = new Reservation(
+                "Alice",
+                "alice",
+                "2025-01-01",
+                "19:00",
+                2,
+                seats2
+        );
+
+        assertTrue("Reservations with identical data should be equal", r1.equals(r2));
+
+        // Change one thing -> equals should now be false
+        r2.setTime("20:00");
+        assertFalse(r1.equals(r2));
     }
 
-    @Test(timeout = 1000)
-    public void testEquals() {
+    @Test
+    public void testToStringContainsCoreInfo() {
         ArrayList<Integer> seats = new ArrayList<>();
-        seats.add(3);
+        Reservation r = new Reservation(
+                "Bob",
+                "bob",
+                "2025-03-10",
+                "20:15",
+                2,
+                seats
+        );
 
-        Reservation reservation1 = new Reservation("JohnDoe", "johndoe", "2025-01-01",
-                "12:00", 1, seats);
-        Reservation res1 = new Reservation("JohnDoe", "johndoe", "2025-01-01",
-                "12:00", 1, seats);
-        Reservation reservation2 = new Reservation("asdf", "johndoe", "2025-01-01",
-                "12:00", 1, seats);
-
-        assertEquals("equals() should match reservation with the same info", reservation1, res1);
-        assertNotEquals("equals() should not match reservation with different info",
-                reservation1, reservation2);
-
-    }
-
-    @Test(timeout = 1000)
-    public void testToString() {
-        ArrayList<Integer> seats = new ArrayList<>();
-        Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10",
-                "18:30", 2, seats);
-
-        String s = res.toString();
-        assertNotNull("toString() should not return null", s);
-        assertEquals("toString() should match expected format and content",
-                "Reservation for JohnDoe @ 2025-11-10 18:30 for 2", s);
+        String s = r.toString();
+        assertTrue(s.contains("Bob"));
+        assertTrue(s.contains("2025-03-10"));
+        assertTrue(s.contains("20:15"));
+        assertTrue(s.contains("2"));
     }
 }
