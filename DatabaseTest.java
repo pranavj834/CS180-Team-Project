@@ -132,6 +132,51 @@ public class DatabaseTest {
     }
 
     @Test(timeout = 1000)
+    public void testLogin() {
+        Database db = new Database();
+        UserAccount john = new UserAccount("johndoe", "12345678",
+                "JohnDoe", "john@email.com");
+        UserAccount jane = new UserAccount("janedoe", "23456789",
+                "JaneDoe", "jane@email.com");
+        db.addAccount(john);
+        db.addAccount(jane);
+
+        assertTrue("login should return true for correct username and password",
+                db.login("johndoe", "12345678"));
+        assertFalse("login should return false for correct username and incorrect password",
+                db.login("johndoe", "2345678"));
+        assertFalse("login should return false for incorrect username and password",
+                db.login("", "blah"));
+        assertFalse("login should return false for incorrect username and correct password",
+                db.login("playdoh", "23456789"));
+        assertTrue("login should return true for another valid account",
+                db.login("janedoe", "23456789"));
+    }
+
+    @Test(timeout = 1000)
+    public void testFileFunctions() {
+        Database db = new Database();
+        UserAccount john = new UserAccount("johndoe", "12345678",
+                "JohnDoe", "john@email.com");
+        db.addAccount(john);
+
+        ArrayList<Integer> seats = new ArrayList<>();
+        seats.add(1);
+        seats.add(2);
+        seats.add(3);
+
+        Reservation reservation = new Reservation("JohnDoe", "johndoe",
+                "2025-11-22", "10:30", 3, seats);
+        db.addReservation(john, reservation);
+        db.writeToFile();
+
+        Database db2 = new Database();
+        db2.readFromFile();
+
+        assertEquals("Accounts should be added into the file", db.getAccounts(), db2.getAccounts());
+        assertEquals("Reservations should be added into the file", db.getReservations(), db2.getReservations());
+    }
+    @Test(timeout = 1000)
     public void testToString() {
         // ----- setup -----
         Database db = new Database();
