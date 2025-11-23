@@ -1,6 +1,4 @@
 import java.time.Duration;          // Duration is used to represent how long a seat hold should last
-import java.time.LocalDate;         // LocalDate is used for reservation dates
-import java.time.LocalTime;         // LocalTime is used for reservation times
 import java.util.List;              // List is used for collections of seat IDs
 
 /**
