@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +10,7 @@ import java.util.ArrayList;
  * @version November 8, 2025
  */
 
-public class Reservation implements ReservationInterface {
+public class Reservation implements ReservationInterface, Serializable {
 
 	//instance variables; variables are based on whatever is important to create reservations
 	private String name;

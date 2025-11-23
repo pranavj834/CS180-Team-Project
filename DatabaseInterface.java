@@ -16,5 +16,7 @@ public interface DatabaseInterface {
     boolean deleteReservation(UserAccount account, Reservation reservation);
     ArrayList<UserAccount> getAccounts();
     ArrayList<Reservation> getReservations();
+    void readFromFile();
+    void writeToFile();
     String toString();
 }

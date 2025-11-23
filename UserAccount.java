@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +10,7 @@ import java.util.ArrayList;
  * @version November 8, 2025
  */
 
-public class UserAccount implements UserAccountInterface {
+public class UserAccount implements UserAccountInterface, Serializable {
 	
 	//instance variables (usual attributes of an account)
 	private String username;
@@ -20,18 +21,23 @@ public class UserAccount implements UserAccountInterface {
 
 	//constructor; sets all the details of the account like username and password to the given inputs in the parameters
 	public UserAccount(String username, String password, String fullName, String email) {
-        if (!username.equals("") && !username.equals("null")) {
-            this.username = username;
+        if (username == null || username.equals("")) {
+            throw new IllegalArgumentException("Invalid username");
         }
-        if (!password.equals("") && !password.equals("null")) {
-            this.password = password;
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Invalid password");
         }
-        if (!fullName.equals("") && !fullName.equals("null")) {
-            this.fullName = fullName;
+        if (fullName == null || fullName.equals("")) {
+            throw new IllegalArgumentException("Invalid full name");
         }
-        if (!email.equals("") && !email.equals("null")) {
-            this.email = email;
+        if (email == null || email.equals("") || !email.contains("@") || !email.contains(".")) {
+            throw new IllegalArgumentException("Invalid email");
         }
+
+        this.username = username;
+        this.password = password;
+        this.fullName = fullName;
+        this.email = email;
         this.reservations = new ArrayList<>();
     }
 
@@ -54,15 +60,27 @@ public class UserAccount implements UserAccountInterface {
 
 	//setter methods; sets the respective instance variable to the respective inputs given
 	public synchronized void setUsername(String username) {
+        if (username == null || username.equals("")) {
+            throw new IllegalArgumentException("Invalid username");
+        }
     	this.username = username;
     }
     public synchronized void setFullName(String fullName) {
+        if (fullName == null || fullName.equals("")) {
+            throw new IllegalArgumentException("Invalid full name");
+        }
     	this.fullName = fullName;
     }
     public synchronized void setEmail(String email) {
+        if (email == null || email.equals("") || !email.contains("@") || !email.contains(".")) {
+            throw new IllegalArgumentException("Invalid email");
+        }
     	this.email = email;
     }
     public synchronized void setPassword(String password) {
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Invalid password");
+        }
     	this.password = password;
     }
 
@@ -93,7 +111,10 @@ public class UserAccount implements UserAccountInterface {
 		UserAccount acct = (UserAccount) obj;
 		String enteredUserName = acct.getUsername();
 		String enteredPassword = acct.getPassword();
-        return username.equals(enteredUserName) && password.equals(enteredPassword);
+        String enteredFullName = acct.getFullName();
+        String enteredEmail = acct.getEmail();
+        return username.equals(enteredUserName) && password.equals(enteredPassword)
+                && fullName.equals(enteredFullName) && email.equals(enteredEmail);
     }
 
 	//prints the account details in case necessary

@@ -78,12 +78,21 @@ public class Database implements DatabaseInterface, Serializable {
         return false;
     }
 
+    public synchronized boolean login(String username, String password) {
+        for (UserAccount account: accounts) {
+            if (account.getUsername().equals(username) && account.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // getters
     public synchronized ArrayList<UserAccount> getAccounts() {
-        return accounts;
+        return new ArrayList<>(accounts);
     }
     public synchronized ArrayList<Reservation> getReservations() {
-        return reservations;
+        return new ArrayList<>(reservations);
     }
 
     public synchronized void writeToFile() {
@@ -101,8 +110,10 @@ public class Database implements DatabaseInterface, Serializable {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream("database.txt"));
             accounts = (ArrayList<UserAccount>) ois.readObject();
             reservations = (ArrayList<Reservation>) ois.readObject();
+            ois.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            accounts = new ArrayList<>();
+            reservations = new ArrayList<>();
         }
     }
 

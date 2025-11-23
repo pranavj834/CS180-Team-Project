@@ -4,26 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4f9bb7f0-06e7-4f29-ac50-edb35099797a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ClientAPI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientAPITest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientCache.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientCacheTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientConnection.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CommunicationPacket.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CommunicationPacketTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DailyHours.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DailyHoursTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ErrorCode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PacketFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PacketFactoryTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PacketType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PriceRule.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PriceRuleTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ReservationServer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ReservationServerInterface.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ServerMain.java" afterDir="false" />
+    <list default="true" id="4f9bb7f0-06e7-4f29-ac50-edb35099797a" name="Changes" comment="Merge remote-tracking branch 'origin/phase1' into phase1&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;CS180-Team-Project.iml">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DatabaseInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/DatabaseInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Reservation.java" beforeDir="false" afterPath="$PROJECT_DIR$/Reservation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserAccount.java" beforeDir="false" afterPath="$PROJECT_DIR$/UserAccount.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,9 +34,22 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/pranavj834/CS180-Team-Project.git&quot;,
-    &quot;accountId&quot;: &quot;43728c28-c591-496d-b269-259b3e870ef3&quot;
+    &quot;accountId&quot;: &quot;1dea5c03-b42f-4094-828e-c0e1598ef6f2&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;pranavj834&quot;,
+    &quot;repository&quot;: &quot;CS180-Team-Project&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -58,22 +58,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;#1 on phase1&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Application.Main.executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "phase1",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Main" />
@@ -84,6 +94,14 @@
       </method>
     </configuration>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="4f9bb7f0-06e7-4f29-ac50-edb35099797a" name="Changes" comment="" />
@@ -91,8 +109,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1762818680293</updated>
+      <workItem from="1763854062483" duration="4161000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="OPEN_GENERIC_TABS">
@@ -120,5 +142,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Merge remote-tracking branch 'origin/phase1' into phase1&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;CS180-Team-Project.iml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/phase1' into phase1&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;CS180-Team-Project.iml" />
   </component>
 </project>
