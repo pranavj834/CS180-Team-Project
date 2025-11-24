@@ -18,7 +18,7 @@ import java.net.Socket;
  * @author zhu1220
  * @version November 20, 2025
  */
-public class ServerMain implements Runnable, ServerMainInterface  {
+public class ServerMain implements Runnable, ServerMainInterface {
 
     /** Port number the server listens on. */
     public static final int PORT = 500;
@@ -73,8 +73,8 @@ public class ServerMain implements Runnable, ServerMainInterface  {
      */
     public static void main(String[] args) {
         ServerMain mainServer = new ServerMain(PORT);
-        // For the normal program, we just run synchronously:
-        mainServer.run();
+        // Start the server on its own thread (implements Runnable)
+        mainServer.startServer();
     }
 
     /**
