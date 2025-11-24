@@ -8,13 +8,13 @@ import java.util.List;
  * @author zhu1220
  * @version November 8, 2025
  */
-public class ClientAPI implements ClientAPIInterface{
+public class ClientAPI {
     private final ClientConnection conn;
     private final ClientCache cache;
 
     public ClientAPI(ClientConnection conn, ClientCache cache) {
         this.conn = conn;
-        // IMPORTANT: use the cache that was passed in (tests depend on this)
+        // IMPORTANT: use the cache passed in from tests / GUI
         this.cache = cache;
     }
 
@@ -26,7 +26,7 @@ public class ClientAPI implements ClientAPIInterface{
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // Tests expect the *message* "Registered OK", not the payload
+        // Tests expect the message string, not payload
         return res.getMessage();
     }
 
@@ -83,7 +83,6 @@ public class ClientAPI implements ClientAPIInterface{
         }
         @SuppressWarnings("unchecked")
         List<Reservation> list = (List<Reservation>) res.getPayload();
-        // update the shared cache instance (JUnit checks this)
         cache.setMyReservations(list);
         return list;
     }
@@ -115,7 +114,7 @@ public class ClientAPI implements ClientAPIInterface{
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // tests expect us to refresh the balance into the cache
+        // After deposit, refresh from server and update cache
         cache.setWalletBalance(getBalance());
     }
 
@@ -124,6 +123,7 @@ public class ClientAPI implements ClientAPIInterface{
         if (res.getErrorCode() != ErrorCode.NONE) {
             return false;
         }
+        // On success, refresh from server and update cache
         cache.setWalletBalance(getBalance());
         return true;
     }

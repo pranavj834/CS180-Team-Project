@@ -18,27 +18,47 @@ import java.net.Socket;
  * @author zhu1220
  * @version November 20, 2025
  */
-public class ServerMain {
+public class ServerMain implements Runnable, ServerMainInterface {
 
     /** Port number the server listens on. */
     public static final int PORT = 500;
 
+    private final int port;
+    private final ReservationServer server;
+
     /**
-     * Starts the reservation server, listens for incoming connections,
-     * and spawns a new thread for each client.
+     * Constructs a server that listens on the given port.
      */
-    public static void main(String[] args) {
-        ReservationServer server = new ReservationServer();
+    public ServerMain(int port) {
+        this.port = port;
+        this.server = new ReservationServer();
+    }
 
-        System.out.println("Reservation server starting on port " + PORT + "...");
+    /**
+     * Convenience method required by ServerMainInterface.
+     * Starts the server loop on a new thread.
+     */
+    @Override
+    public void startServer() {
+        Thread t = new Thread(this);
+        t.start();
+    }
 
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Reservation server is now listening on port " + PORT);
+    /**
+     * Runnable entry point: opens the ServerSocket and accepts clients.
+     */
+    @Override
+    public void run() {
+        System.out.println("Reservation server starting on port " + port + "...");
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Reservation server is now listening on port " + port);
 
             while (true) {
-                Socket clientSocket = serverSocket.accept(); 
+                Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected from " + clientSocket.getRemoteSocketAddress());
 
+                // Spawn a handler for each client
                 Thread handler = new Thread(() -> handleClient(clientSocket, server));
                 handler.start();
             }
@@ -46,6 +66,15 @@ public class ServerMain {
             System.err.println("Fatal server error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Classic static main so you can still run the server directly.
+     */
+    public static void main(String[] args) {
+        ServerMain mainServer = new ServerMain(PORT);
+        // For the normal program, we just run synchronously:
+        mainServer.run();
     }
 
     /**
