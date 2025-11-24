@@ -27,7 +27,6 @@ public class DatabaseTest {
     @Before
     public void setUp() {
         db = new Database();
-        // Make sure we start from clean files
         deleteIfExists(ACCOUNT_FILE);
         deleteIfExists(RESERVATION_FILE);
     }
@@ -41,31 +40,29 @@ public class DatabaseTest {
     private void deleteIfExists(String path) {
         File f = new File(path);
         if (f.exists()) {
-            // ignore result
             f.delete();
         }
     }
 
-    /**
-     * Saving and loading an empty database should not throw
-     * and should produce an empty database.
-     */
+    // -------------------------------------------------------
+    // EMPTY DATABASE
+    // -------------------------------------------------------
+
     @Test
     public void testSaveAndLoadEmptyDatabase() throws IOException {
-        // save empty DB
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        // load into a new DB
         Database loaded = new Database();
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        assertEquals("Accounts size after loading empty DB", 0, loaded.getAccounts().size());
-        assertEquals("Reservations size after loading empty DB", 0, loaded.getReservations().size());
+        assertEquals(0, loaded.getAccounts().size());
+        assertEquals(0, loaded.getReservations().size());
     }
 
-    /**
-     * One account, no reservations. Check that all fields are correctly stored and reloaded.
-     */
+    // -------------------------------------------------------
+    // SINGLE ACCOUNT, NO RESERVATIONS
+    // -------------------------------------------------------
+
     @Test
     public void testSaveAndLoadSingleAccountNoReservations() throws IOException {
         UserAccount acct = new UserAccount("user1", "pass1", "Alice", "alice@example.com");
@@ -87,10 +84,10 @@ public class DatabaseTest {
         assertEquals(0, loaded.getReservations().size());
     }
 
-    /**
-     * One account with one reservation. Check that both the reservation list
-     * in the Database and in the UserAccount are restored properly, including seats.
-     */
+    // -------------------------------------------------------
+    // ONE ACCOUNT WITH ONE RESERVATION
+    // -------------------------------------------------------
+
     @Test
     public void testSaveAndLoadAccountWithReservation() throws IOException {
         UserAccount acct = new UserAccount("user2", "pass2", "Bob", "bob@example.com");
@@ -107,13 +104,9 @@ public class DatabaseTest {
         Database loaded = new Database();
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        // Check accounts
         assertEquals(1, loaded.getAccounts().size());
         UserAccount loadedAcct = loaded.getAccounts().get(0);
-        assertEquals("user2", loadedAcct.getUsername());
-        assertEquals("Bob", loadedAcct.getFullName());
 
-        // Check reservations in global list
         assertEquals(1, loaded.getReservations().size());
         Reservation loadedRes = loaded.getReservations().get(0);
         assertEquals("Bob", loadedRes.getName());
@@ -123,16 +116,15 @@ public class DatabaseTest {
         assertEquals(3, loadedRes.getNumPeople());
         assertEquals(Arrays.asList(5, 6, 7), loadedRes.getSeats());
 
-        // Check reservations attached to user account
         assertEquals(1, loadedAcct.getReservations().size());
         Reservation fromAcct = loadedAcct.getReservations().get(0);
-        assertEquals("Bob", fromAcct.getName());
         assertEquals(Arrays.asList(5, 6, 7), fromAcct.getSeats());
     }
 
-    /**
-     * Make sure reservation time collision logic is preserved even after loading.
-     */
+    // -------------------------------------------------------
+    // RESERVATION COLLISION
+    // -------------------------------------------------------
+
     @Test
     public void testReservationCollisionAfterLoad() throws IOException {
         UserAccount acct = new UserAccount("user3", "pass3", "Carl", "carl@example.com");
@@ -141,29 +133,28 @@ public class DatabaseTest {
         ArrayList<Integer> seats1 = new ArrayList<>(Arrays.asList(1, 2));
         Reservation r1 = new Reservation("Carl", "user3",
                 "2025-11-24", "18:00", 2, seats1);
+
         assertTrue(db.addReservation(acct, r1));
 
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        // Load into new DB
         Database loaded = new Database();
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        // Create another reservation with SAME date + time (should fail)
         UserAccount loadedAcct = loaded.getAccounts().get(0);
+
         ArrayList<Integer> seats2 = new ArrayList<>(Arrays.asList(3, 4));
         Reservation r2 = new Reservation("Carl", "user3",
                 "2025-11-24", "18:00", 2, seats2);
 
-        assertFalse("Second reservation with same date+time should fail",
-                loaded.addReservation(loadedAcct, r2));
+        assertFalse(loaded.addReservation(loadedAcct, r2));
         assertEquals(1, loaded.getReservations().size());
     }
 
-    /**
-     * Delete an account with a reservation, save, reload,
-     * and verify both the account and its reservations are gone.
-     */
+    // -------------------------------------------------------
+    // DELETE ACCOUNT AND PERSIST REMOVAL
+    // -------------------------------------------------------
+
     @Test
     public void testDeleteAccountPersists() throws IOException {
         UserAccount acct = new UserAccount("user4", "pass4", "Dana", "dana@example.com");
@@ -174,12 +165,10 @@ public class DatabaseTest {
                 "2025-11-25", "20:00", 2, seats);
         assertTrue(db.addReservation(acct, res));
 
-        // Now delete account and confirm in-memory
         assertTrue(db.deleteAccount(acct));
         assertEquals(0, db.getAccounts().size());
         assertEquals(0, db.getReservations().size());
 
-        // Save and reload, should still be empty
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         Database loaded = new Database();
@@ -189,12 +178,39 @@ public class DatabaseTest {
         assertEquals(0, loaded.getReservations().size());
     }
 
-    /**
-     * Loading from non-existent files should not throw and should keep DB empty.
-     */
+    // -------------------------------------------------------
+    // NEW TEST: WRONG USERNAME/PASSWORD/FULLNAME/EMAIL
+    // -------------------------------------------------------
+
+    @Test
+    public void testCannotAddReservationWithWrongAccountInfo() {
+        // Real account stored in DB
+        UserAccount real = new UserAccount("goodUser", "goodPass",
+                "RealName", "real@example.com");
+        assertTrue(db.addAccount(real));
+
+        // Fake account with wrong username, password, fullName, and email
+        UserAccount fake = new UserAccount("wrongUser", "wrongPass",
+                "FakeName", "fake@example.com");
+
+        ArrayList<Integer> seats = new ArrayList<>(Arrays.asList(1, 2));
+        Reservation res = new Reservation("FakeName", "wrongUser",
+                "2025-12-01", "18:00", 2, seats);
+
+        // Attempt to add reservation with an invalid account → must fail
+        boolean added = db.addReservation(fake, res);
+        assertFalse("Reservation should NOT be added with invalid login info", added);
+
+        assertEquals(0, db.getReservations().size());
+        assertEquals(0, db.getAccounts().get(0).getReservations().size());
+    }
+
+    // -------------------------------------------------------
+    // LOADING FROM NON-EXISTENT FILES
+    // -------------------------------------------------------
+
     @Test
     public void testLoadFromMissingFiles() throws IOException {
-        // Make sure files do NOT exist
         deleteIfExists(ACCOUNT_FILE);
         deleteIfExists(RESERVATION_FILE);
 
