@@ -5,34 +5,35 @@ import java.util.List;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  */
-public class ClientAPI {
+public class ClientAPI implements ClientAPIInterface {
     private final ClientConnection conn;
     private final ClientCache cache;
 
     public ClientAPI(ClientConnection conn, ClientCache cache) {
         this.conn = conn;
-        // IMPORTANT: use the cache passed in (tests rely on this)
         this.cache = cache;
     }
 
     // ---------- AUTH ----------
 
-    public String register(String username, String password) throws Exception {
+    @Override
+    public synchronized String register(String username, String password) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.register(username, password));
 
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // Tests expect the message string
         return res.getMessage();
     }
 
-    public boolean login(String username, String password) throws Exception {
+    @Override
+    public synchronized boolean login(String username, String password) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.login(username, password));
         return res.getErrorCode() == ErrorCode.NONE;
     }
 
-    public void logout() throws Exception {
+    @Override
+    public synchronized void logout() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.logout());
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
@@ -41,7 +42,8 @@ public class ClientAPI {
 
     // ---------- BOOKING ----------
 
-    public List<Integer> getOpenSeats(String date, String time, int partySize) throws Exception {
+    @Override
+    public synchronized List<Integer> getOpenSeats(String date, String time, int partySize) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getOpenSeats(date, time, partySize));
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
@@ -51,15 +53,17 @@ public class ClientAPI {
         return seats;
     }
 
-    public boolean holdSeats(String date, String time,
-                             List<Integer> seatNumbers, int holdSeconds) throws Exception {
+    @Override
+    public synchronized boolean holdSeats(String date, String time,
+                                          List<Integer> seatNumbers, int holdSeconds) throws Exception {
         CommunicationPacket res = conn.send(
                 PacketFactory.holdSeats(date, time, seatNumbers, holdSeconds));
         return res.getErrorCode() == ErrorCode.NONE;
     }
 
-    public Reservation confirmReservation(String date, String time,
-                                          List<Integer> seatNumbers, int partySize) throws Exception {
+    @Override
+    public synchronized Reservation confirmReservation(String date, String time,
+                                                       List<Integer> seatNumbers, int partySize) throws Exception {
         CommunicationPacket res = conn.send(
                 PacketFactory.confirmReservation(date, time, seatNumbers, partySize));
         if (res.getErrorCode() != ErrorCode.NONE) {
@@ -68,12 +72,14 @@ public class ClientAPI {
         return (Reservation) res.getPayload();
     }
 
-    public boolean cancelReservation(String reservationId) throws Exception {
+    @Override
+    public synchronized boolean cancelReservation(String reservationId) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.cancelReservation(reservationId));
         return res.getErrorCode() == ErrorCode.NONE;
     }
 
-    public List<Reservation> getReservations() throws Exception {
+    @Override
+    public synchronized List<Reservation> getReservations() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getReservations());
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
@@ -86,7 +92,8 @@ public class ClientAPI {
 
     // ---------- PRICING (client-side only; server may stub) ----------
 
-    public double quote(List<Integer> seatNumbers, String date, String time, int partySize)
+    @Override
+    public synchronized double quote(List<Integer> seatNumbers, String date, String time, int partySize)
             throws Exception {
         CommunicationPacket res = conn.send(
                 PacketFactory.quotePrice(seatNumbers, date, time, partySize));
@@ -96,7 +103,7 @@ public class ClientAPI {
         return (double) res.getPayload();
     }
 
-    public void setPriceRule(double basePrice, double perPersonPrice) throws Exception {
+    public synchronized void setPriceRule(double basePrice, double perPersonPrice) throws Exception {
         CommunicationPacket res = conn.send(
                 PacketFactory.setPriceRule(basePrice, perPersonPrice));
         if (res.getErrorCode() != ErrorCode.NONE) {
@@ -106,16 +113,17 @@ public class ClientAPI {
 
     // ---------- PAYMENT ----------
 
-    public void deposit(double amount) throws Exception {
+    @Override
+    public synchronized void deposit(double amount) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.depositMoney(amount));
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // refresh from server (FakeClientConnection in tests handles this)
         cache.setWalletBalance(getBalance());
     }
 
-    public boolean withdraw(double amount) throws Exception {
+    @Override
+    public synchronized boolean withdraw(double amount) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.withdrawMoney(amount));
         if (res.getErrorCode() != ErrorCode.NONE) {
             return false;
@@ -124,7 +132,8 @@ public class ClientAPI {
         return true;
     }
 
-    public double getBalance() throws Exception {
+    @Override
+    public synchronized double getBalance() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getBalance());
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());

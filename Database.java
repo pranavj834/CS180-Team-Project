@@ -10,11 +10,11 @@ import java.util.List;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version November 23, 2025 (persistence added by zhu1220)
+ * @version November 23, 2025 (persistence added by zhu1220, thread-safety tightened)
  */
 public class Database implements DatabaseInterface {
-    private ArrayList<UserAccount> accounts;
-    private ArrayList<Reservation> reservations;
+    private final ArrayList<UserAccount> accounts;
+    private final ArrayList<Reservation> reservations;
 
     // initializes arraylists
     public Database() {
@@ -31,6 +31,7 @@ public class Database implements DatabaseInterface {
      * @param reservationFile  path for reservations file
      * @throws IOException if writing fails
      */
+    @Override
     public synchronized void saveToFiles(String accountFile, String reservationFile) throws IOException {
         saveAccounts(accountFile);
         saveReservations(reservationFile);
@@ -44,6 +45,7 @@ public class Database implements DatabaseInterface {
      * @param reservationFile  path for reservations file
      * @throws IOException if reading fails
      */
+    @Override
     public synchronized void loadFromFiles(String accountFile, String reservationFile) throws IOException {
         accounts.clear();
         reservations.clear();
@@ -176,6 +178,7 @@ public class Database implements DatabaseInterface {
     // =============== EXISTING METHODS =================
 
     // adds account
+    @Override
     public synchronized boolean addAccount(UserAccount account) {
         if (accounts.contains(account)) {
             return false;
@@ -185,6 +188,7 @@ public class Database implements DatabaseInterface {
     }
 
     // adds reservation
+    @Override
     public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
         for (Reservation r : reservations) {
             if (r.getDate().equals(reservation.getDate())
@@ -204,6 +208,7 @@ public class Database implements DatabaseInterface {
     }
 
     // deletes account
+    @Override
     public synchronized boolean deleteAccount(UserAccount account) {
         if (accounts.contains(account)) {
             for (Reservation r : account.getReservations()) {
@@ -217,6 +222,7 @@ public class Database implements DatabaseInterface {
     }
 
     // deletes reservation
+    @Override
     public synchronized boolean deleteReservation(UserAccount account, Reservation reservation) {
         // fail if account doesn't exist
         int index = accounts.indexOf(account);
@@ -233,16 +239,19 @@ public class Database implements DatabaseInterface {
         return false;
     }
 
-    // getters
+    // getters — return defensive copies
+    @Override
     public synchronized ArrayList<UserAccount> getAccounts() {
-        return accounts;
+        return new ArrayList<>(accounts);
     }
 
+    @Override
     public synchronized ArrayList<Reservation> getReservations() {
-        return reservations;
+        return new ArrayList<>(reservations);
     }
 
-    public String toString() {
+    @Override
+    public synchronized String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Accounts:\n");
         for (UserAccount account : accounts) {

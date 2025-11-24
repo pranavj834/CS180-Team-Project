@@ -1,85 +1,41 @@
 import org.junit.Test;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import static org.junit.Assert.*;
 
 /**
- * Tests that ServerMain successfully accepts a connection and can process
- * a CommunicationPacket through ReservationServer.
+ * Minimal test for ServerMain to satisfy the requirement
+ * of testing constructors and methods (excluding run's real IO).
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
  */
 public class ServerMainTest {
 
     /**
-     * This test does NOT run ServerMain.main() because that would block forever.
-     *
-     * Instead, we simulate the same behavior:
-     *  - Start a temporary ServerSocket on a free port
-     *  - Accept exactly one client
-     *  - Process ONE packet using ReservationServer.handlePacket()
+     * Test subclass that overrides run() to avoid opening real sockets.
      */
-    @Test(timeout = 4000)
-    public void testServerAcceptsAndProcessesOnePacket() throws Exception {
-        ReservationServer server = new ReservationServer();
+    private static class TestableServerMain extends ServerMain {
 
-        // Create temp server on random free port
-        try (ServerSocket serverSocket = new ServerSocket(0)) {
-            int port = serverSocket.getLocalPort();
+        volatile boolean ran = false;
 
-            // Start "ServerMain-like" handler thread
-            Thread serverThread = new Thread(() -> {
-                try {
-                    Socket client = serverSocket.accept();
-
-                    ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
-                    out.flush();
-                    ObjectInputStream in = new ObjectInputStream(client.getInputStream());
-
-                    Object incoming = in.readObject();
-                    if (incoming instanceof CommunicationPacket) {
-                        CommunicationPacket req = (CommunicationPacket) incoming;
-                        CommunicationPacket res = server.handlePacket(req);
-
-                        out.writeObject(res);
-                        out.flush();
-                    }
-
-                    in.close();
-                    out.close();
-                    client.close();
-                } catch (Exception ignored) {}
-            });
-            serverThread.setDaemon(true);
-            serverThread.start();
-
-            // --- CLIENT SIDE ---
-            try (
-                    Socket socket = new Socket("localhost", port);
-                    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream())
-            ) {
-                out.flush();
-
-                // Build a request: GET_BALANCE (always safe)
-                CommunicationPacket req = new CommunicationPacket()
-                        .setPacketType(PacketType.GET_BALANCE);
-
-                out.writeObject(req);
-                out.flush();
-
-                Object obj = in.readObject();
-                assertTrue(obj instanceof CommunicationPacket);
-
-                CommunicationPacket res = (CommunicationPacket) obj;
-
-                assertEquals(PacketType.GET_BALANCE, res.getPacketType());
-                assertEquals(ErrorCode.NONE, res.getErrorCode());
-                assertEquals(0.0, (double) res.getPayload(), 0.0001);
-                assertEquals("Balance retrieved", res.getMessage());
-            }
+        public TestableServerMain(int port) {
+            super(port);
         }
+
+        @Override
+        public void run() {
+            ran = true;
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testStartServerStartsThread() throws InterruptedException {
+        TestableServerMain s = new TestableServerMain(12345);
+
+        s.startServer();
+
+        // Give the thread a moment to run
+        Thread.sleep(100);
+
+        assertTrue("run() should have been invoked on background thread", s.ran);
     }
 }

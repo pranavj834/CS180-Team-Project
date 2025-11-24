@@ -6,61 +6,62 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author jastip, chan531, lab sec L23
- * @version November 8, 2025
+ * @version November 8, 2025 (thread-safety tightened by zhu1220)
  */
 
 public class UserAccount implements UserAccountInterface {
-	
+
 	//instance variables (usual attributes of an account)
 	private String username;
 	private String fullName;
 	private String email;
 	private String password;
-	private ArrayList<Reservation> reservations; //tracks all the user's reservations
+	private final ArrayList<Reservation> reservations; //tracks all the user's reservations
 
 	//constructor; sets all the details of the account like username and password to the given inputs in the parameters
 	public UserAccount(String username, String password, String fullName, String email) {
-        this.username = username;
-        this.password = password;
-        this.fullName = fullName;
-        this.email = email;
+		this.username = username;
+		this.password = password;
+		this.fullName = fullName;
+		this.email = email;
 		reservations = new ArrayList<>();
-    }
+	}
 
-	//getter methods; gives the respective instance variable to the respective inputs given
+	//getter methods
 	public synchronized String getUsername() {
 		return username;
 	}
-    public synchronized String getFullName() {
-    	return fullName;
-    }
-    public synchronized String getEmail() {
-    	return email;
-    }
+	public synchronized String getFullName() {
+		return fullName;
+	}
+	public synchronized String getEmail() {
+		return email;
+	}
 	public synchronized String getPassword() {
 		return password;
 	}
+
+	/**
+	 * Returns a defensive copy of the reservations list so callers
+	 * cannot mutate internal state without synchronization.
+	 */
 	public synchronized ArrayList<Reservation> getReservations() {
-		return reservations;
+		return new ArrayList<>(reservations);
 	}
 
-	//setter methods; sets the respective instance variable to the respective inputs given
+	//setter methods
 	public synchronized void setUsername(String username) {
-    	this.username = username;
-    }
-    public synchronized void setFullName(String fullName) {
-    	this.fullName = fullName;
-    }
-    public synchronized void setEmail(String email) {
-    	this.email = email;
-    }
-    public synchronized void setPassword(String password) {
-    	this.password = password;
-    }
-
-	//other methods
-	//checks to see if the entered username and password is correct
-
+		this.username = username;
+	}
+	public synchronized void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+	public synchronized void setEmail(String email) {
+		this.email = email;
+	}
+	public synchronized void setPassword(String password) {
+		this.password = password;
+	}
 
 	//books a reservation
 	public synchronized boolean addReservation(Reservation res) {
@@ -85,11 +86,12 @@ public class UserAccount implements UserAccountInterface {
 		UserAccount acct = (UserAccount) obj;
 		String enteredUserName = acct.getUsername();
 		String enteredPassword = acct.getPassword();
-        return username.equals(enteredUserName) && password.equals(enteredPassword);
-    }
+		return username.equals(enteredUserName) && password.equals(enteredPassword);
+	}
 
 	//prints the account details in case necessary
-	public String toString() {
+	@Override
+	public synchronized String toString() {
 		return String.format("UserAccount for %s, %s - %s", fullName, username, email);
 	}
 }

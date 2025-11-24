@@ -4,28 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85c11a23-06c9-4f28-b3b0-6efd11b9d062" name="Changes" comment="Updated everything">
-      <change afterPath="$PROJECT_DIR$/ClientConnectionTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientHandlerTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientMainTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ServerMainTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="85c11a23-06c9-4f28-b3b0-6efd11b9d062" name="Changes" comment="Made sure database stores data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ClientAPI.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientAPI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ClientAPITest.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientAPITest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientCache.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientCache.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientCacheTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientCacheTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientConnection.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CommunicationPacket.java" beforeDir="false" afterPath="$PROJECT_DIR$/CommunicationPacket.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CommunicationPacketTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/CommunicationPacketTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/ErrorCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PacketFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/PacketFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PacketFactoryTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/PacketFactoryTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PacketType.java" beforeDir="false" afterPath="$PROJECT_DIR$/PacketType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reservation.java" beforeDir="false" afterPath="$PROJECT_DIR$/Reservation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ReservationServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/ReservationServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ReservationServerInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/ReservationServerInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DatabaseInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/DatabaseInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DatabaseTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/DatabaseTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ReservationServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/ReservationServerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerMainTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerMainTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/CS180-Team-Project/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CS180-Team-Project/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/CS180-Team-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CS180-Team-Project/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/CS180-Team-Project/Database.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CS180-Team-Project/Database.class" afterDir="false" />
@@ -50,9 +37,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Kotlin Class" />
-        <option value="Interface" />
         <option value="JUnit5 Test Class" />
         <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -89,19 +76,26 @@
     "JUnit.ClientAPITest.executor": "Run",
     "JUnit.ClientAPITest.testConfirmReservationUsesTimeStringAndPartySize.executor": "Run",
     "JUnit.ClientAPITest.testGetOpenSeats.executor": "Run",
+    "JUnit.ClientCacheTest.executor": "Run",
     "JUnit.ClientCacheTest.testGetMyReservationsIsUnmodifiable.executor": "Run",
     "JUnit.ClientCacheTest.testInitialState.executor": "Run",
     "JUnit.ClientCacheTest.testSetMyReservationsCopiesList.executor": "Run",
     "JUnit.ClientCacheTest.testSetMyReservationsNullBecomesEmptyList.executor": "Run",
     "JUnit.ClientCacheTest.testWalletBalanceGetterSetter.executor": "Run",
+    "JUnit.ClientConnectionTest.executor": "Run",
     "JUnit.ClientConnectionTest.testIsConnectedBeforeConnect.executor": "Run",
     "JUnit.ClientConnectionTest.testSessionIdSetterGetter.executor": "Run",
+    "JUnit.ClientHandlerTest.executor": "Run",
     "JUnit.ClientHandlerTest.testClientHandlerIsRunnable.executor": "Run",
     "JUnit.ClientMainTest.executor": "Run",
     "JUnit.ClientMainTest.testClientMainRunsWithoutCrashing.executor": "Run",
+    "JUnit.CommunicationPacketTest.executor": "Run",
+    "JUnit.DatabaseTest.executor": "Run",
+    "JUnit.PacketFactoryTest.executor": "Run",
     "JUnit.PacketFactoryTest.testConfirmReservationPayload.executor": "Run",
     "JUnit.ReservationServerTest.executor": "Run",
     "JUnit.ReservationServerTest.testConfirmReservationNotLoggedIn.executor": "Run",
+    "JUnit.ReservationTest.executor": "Run",
     "JUnit.ServerMainTest.executor": "Run",
     "Repository.Attach.Annotations": "false",
     "Repository.Attach.JavaDocs": "false",
@@ -123,7 +117,7 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ClientMainTest">
+  <component name="RunManager" selected="JUnit.DatabaseTest">
     <configuration name="ClientMainTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="CS180-Team-Project" />
       <option name="PACKAGE_NAME" value="" />
@@ -133,19 +127,10 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CommunicationPacketTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="DatabaseTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="CS180-Team-Project" />
       <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="CommunicationPacketTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="PacketFactoryTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="CS180-Team-Project" />
-      <option name="PACKAGE_NAME" value="" />
-      <option name="MAIN_CLASS_NAME" value="PacketFactoryTest" />
+      <option name="MAIN_CLASS_NAME" value="DatabaseTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -155,6 +140,15 @@
       <module name="CS180-Team-Project" />
       <option name="PACKAGE_NAME" value="" />
       <option name="MAIN_CLASS_NAME" value="ReservationServerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ReservationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="CS180-Team-Project" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="ReservationTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -171,11 +165,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.DatabaseTest" />
+        <item itemvalue="JUnit.ReservationTest" />
         <item itemvalue="JUnit.ClientMainTest" />
         <item itemvalue="JUnit.ServerMainTest" />
         <item itemvalue="JUnit.ReservationServerTest" />
-        <item itemvalue="JUnit.PacketFactoryTest" />
-        <item itemvalue="JUnit.CommunicationPacketTest" />
       </list>
     </recent_temporary>
   </component>
@@ -404,7 +398,47 @@
       <option name="project" value="LOCAL" />
       <updated>1763946379354</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Updated everything">
+      <option name="closed" value="true" />
+      <created>1763949740009</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1763949740009</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Updated interface">
+      <option name="closed" value="true" />
+      <created>1763951906031</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1763951906031</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Made some final updates">
+      <option name="closed" value="true" />
+      <created>1763953458741</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1763953458741</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Made sure database stores data">
+      <option name="closed" value="true" />
+      <created>1763955035023</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1763955035024</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Made sure database stores data">
+      <option name="closed" value="true" />
+      <created>1763955119584</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1763955119584</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -428,7 +462,10 @@
     <MESSAGE value="Updated ClientMain and ServerMain" />
     <MESSAGE value="Deleated local time and date" />
     <MESSAGE value="Updated everything" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated everything" />
+    <MESSAGE value="Updated interface" />
+    <MESSAGE value="Made some final updates" />
+    <MESSAGE value="Made sure database stores data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made sure database stores data" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -442,6 +479,11 @@
           <url>file://$PROJECT_DIR$/CommunicationPacket.java</url>
           <line>11</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/DatabaseTest.java</url>
+          <line>34</line>
+          <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

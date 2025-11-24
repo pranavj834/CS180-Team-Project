@@ -14,21 +14,21 @@ public class ClientCache {
     private List<Reservation> myReservations = new ArrayList<>();
     private Double walletBalance;   // may be null until first getBalance()
 
-    public List<Reservation> getMyReservations() {
-        return Collections.unmodifiableList(myReservations);
+    public synchronized List<Reservation> getMyReservations() {
+        return Collections.unmodifiableList(new ArrayList<>(myReservations));
     }
 
-    public void setMyReservations(List<Reservation> list) {
+    public synchronized void setMyReservations(List<Reservation> list) {
         this.myReservations = (list == null)
                 ? new ArrayList<>()
                 : new ArrayList<>(list);
     }
 
-    public Double getWalletBalance() {
+    public synchronized Double getWalletBalance() {
         return walletBalance;
     }
 
-    public void setWalletBalance(Double walletBalance) {
+    public synchronized void setWalletBalance(Double walletBalance) {
         this.walletBalance = walletBalance;
     }
 }

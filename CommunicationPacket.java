@@ -7,59 +7,59 @@ import java.util.UUID;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author zhu1220, lab sec L23
- * @version November 8, 2025
+ * @version November 8, 2025 (thread-safety tightened)
  */
 public class CommunicationPacket implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String requestId = UUID.randomUUID().toString();
+    private final String requestId = UUID.randomUUID().toString();
     private PacketType packetType;
     private Object payload;
     private ErrorCode errorCode = ErrorCode.NONE;
     private String message;
 
-    public String getRequestId() {
+    public synchronized String getRequestId() {
         return requestId;
     }
 
-    public PacketType getPacketType() {
+    public synchronized PacketType getPacketType() {
         return packetType;
     }
 
-    public Object getPayload() {
+    public synchronized Object getPayload() {
         return payload;
     }
 
-    public ErrorCode getErrorCode() {
+    public synchronized ErrorCode getErrorCode() {
         return errorCode;
     }
 
-    public String getMessage() {
+    public synchronized String getMessage() {
         return message;
     }
 
-    public CommunicationPacket setPacketType(PacketType packetType) {
+    public synchronized CommunicationPacket setPacketType(PacketType packetType) {
         this.packetType = packetType;
         return this;
     }
 
-    public CommunicationPacket setPayload(Object payload) {
+    public synchronized CommunicationPacket setPayload(Object payload) {
         this.payload = payload;
         return this;
     }
 
-    public CommunicationPacket setErrorCode(ErrorCode errorCode) {
+    public synchronized CommunicationPacket setErrorCode(ErrorCode errorCode) {
         this.errorCode = errorCode;
         return this;
     }
 
-    public CommunicationPacket setMessage(String message) {
+    public synchronized CommunicationPacket setMessage(String message) {
         this.message = message;
         return this;
     }
 
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "Packet{" +
                 packetType +
                 ", req=" + requestId +

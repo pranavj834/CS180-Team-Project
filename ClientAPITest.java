@@ -62,7 +62,16 @@ public class ClientAPITest {
 
     // ---------- BOOKING ----------
 
+    @Test
+    public void testGetOpenSeatsReturnsList() throws Exception {
+        List<Integer> expected = Arrays.asList(1, 2, 3);
+        conn.nextResponse = okPayload(expected);
 
+        List<Integer> result = api.getOpenSeats("2025-01-01", "18:00", 3);
+
+        assertEquals(expected, result);
+        assertEquals(PacketType.GET_OPEN_SEATS, conn.lastSent.getPacketType());
+    }
 
     @Test
     public void testHoldSeatsSuccess() throws Exception {
