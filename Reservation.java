@@ -11,6 +11,8 @@ import java.util.Objects;
  * - seatNumbers must be non-empty, all > 0, and size must equal partySize
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *  * @author zhu1220, jastip
+ *  * @version November 20, 2025
  */
 public class Reservation implements Serializable {
 
