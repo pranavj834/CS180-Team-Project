@@ -23,8 +23,7 @@ public class ReservationServer implements ReservationServerInterface {
      */
     public ReservationServer() {
         this.database = new Database();
-        // Default pricing: everything is free until SET_PRICE_RULE is called.
-        Reservation.configurePricing(0.0, 0.0);
+        // Pricing is no longer handled by the server.
     }
 
     /**
@@ -77,15 +76,7 @@ public class ReservationServer implements ReservationServerInterface {
                     handleGetReservations(req, res);
                     break;
 
-                // ---------- PRICING ----------
-                case QUOTE_PRICE:
-                    handleQuotePrice(req, res);
-                    break;
-                case SET_PRICE_RULE:
-                    handleSetPriceRule(req, res);
-                    break;
-
-                // ---------- PAYMENT ----------
+                // ---------- PAYMENT (still stubbed) ----------
                 case DEPOSIT_MONEY:
                     handleDeposit(req, res);
                     break;
@@ -230,7 +221,6 @@ public class ReservationServer implements ReservationServerInterface {
         List<Integer> seatNums = (List<Integer>) arr[2];
         int partySize = (int) arr[3];
 
-        // For now, we don't know which user is logged in, so use a generic guest.
         ArrayList<Integer> seatsCopy = new ArrayList<>(seatNums);
 
         Reservation reservation = new Reservation(
@@ -242,16 +232,28 @@ public class ReservationServer implements ReservationServerInterface {
                 seatsCopy
         );
 
-        // We could add this to the database under a dummy account if desired,
-        // but for now we just return it.
+        // Add under a dummy "guest" account so GET_RESERVATIONS returns something.
+        UserAccount guest = null;
+        for (UserAccount ua : database.getAccounts()) {
+            if (ua.getUsername().equals("guest")) {
+                guest = ua;
+                break;
+            }
+        }
+        if (guest == null) {
+            guest = new UserAccount("guest", "guest", "Guest", "guest@email.com");
+            database.addAccount(guest);
+        }
+        database.addReservation(guest, reservation);
+
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(reservation)
-                .setMessage("Reservation confirmed (stub)");
+                .setMessage("Reservation confirmed");
     }
 
     /** Payload: String reservationId (unused for now) */
     private void handleCancelReservation(CommunicationPacket req, CommunicationPacket res) {
-        // We don't have IDs wired up yet, so this is a stub.
+        // We don't have reservation IDs wired up yet, so this is still a stub.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Reservation cancelled (stub)");
     }
@@ -264,51 +266,6 @@ public class ReservationServer implements ReservationServerInterface {
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(all)
                 .setMessage("Reservations retrieved (stub)");
-    }
-
-    // ============================================================
-    // ========================= PRICING ==========================
-    // ============================================================
-
-    /**
-     * Payload: Object[]{List<Integer> seats, String date, String time, int partySize}
-     *
-     * Right now, we ignore seats/date/time and just price by partySize using
-     * Reservation.computePrice().
-     */
-    private void handleQuotePrice(CommunicationPacket req, CommunicationPacket res) {
-        Object[] arr = (Object[]) req.getPayload();
-        int partySize = (int) arr[3];
-
-        double price = Reservation.computePrice(partySize);
-
-        res.setErrorCode(ErrorCode.NONE)
-                .setPayload(price)
-                .setMessage("Quote computed");
-    }
-
-    /**
-     * Payload: Object[]{Double basePrice, Double perPersonPrice}
-     *
-     * This updates the static pricing rule stored in Reservation.
-     */
-    private void handleSetPriceRule(CommunicationPacket req, CommunicationPacket res) {
-        Object payload = req.getPayload();
-
-        if (!(payload instanceof Object[])) {
-            res.setErrorCode(ErrorCode.INVALID_INPUT)
-                    .setMessage("SET_PRICE_RULE payload must be Object[] [basePrice, perPersonPrice]");
-            return;
-        }
-
-        Object[] arr = (Object[]) payload;
-        double base = (double) arr[0];
-        double perPerson = (double) arr[1];
-
-        Reservation.configurePricing(base, perPerson);
-
-        res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Price rule updated");
     }
 
     // ============================================================

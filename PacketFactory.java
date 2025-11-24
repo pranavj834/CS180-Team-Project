@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * @author zhu1220, lab sec L23
  * @version November 8, 2025
  */
-public final class PacketFactory {
+public final class PacketFactory implements Serializable {
 
     private PacketFactory() { }
 

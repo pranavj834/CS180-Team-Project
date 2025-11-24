@@ -8,7 +8,7 @@ import java.util.List;
  * @author zhu1220
  * @version November 8, 2025
  */
-public class ClientAPI {
+public class ClientAPI implements ClientAPIInterface{
     private final ClientConnection conn;
     private final ClientCache cache;
 
