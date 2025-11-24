@@ -1,24 +1,23 @@
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
- * Reservation data object. Thread-safe via internal lock and
- * defensive copies of mutable collections.
+ * Represents a reservation. Validates basic input:
+ * - name, username, date, time not blank
+ * - partySize > 0
+ * - seat numbers > 0 (if present)
  */
 public class Reservation implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Object lock = new Object();
-
-	private final String name;
-	private final String username;
+	private String name;
+	private String username;
 	private String date;   // "YYYY-MM-DD"
 	private String time;   // "HH:MM"
 	private int partySize;
-	private final ArrayList<Integer> seatNumbers;
+	private ArrayList<Integer> seatNumbers;
 
 	public Reservation(String name,
 					   String username,
@@ -27,133 +26,125 @@ public class Reservation implements Serializable {
 					   int partySize,
 					   ArrayList<Integer> seatNumbers) {
 
-		synchronized (lock) {
-			this.name = name;
-			this.username = username;
-			this.date = date;
-			this.time = time;
-			this.partySize = partySize;
-			this.seatNumbers = (seatNumbers == null)
-					? new ArrayList<>()
-					: new ArrayList<>(seatNumbers);
+		validateName(name);
+		validateUsername(username);
+		validateDate(date);
+		validateTime(time);
+		validatePartySize(partySize);
+		validateSeats(seatNumbers);
+
+		this.name = name;
+		this.username = username;
+		this.date = date;
+		this.time = time;
+		this.partySize = partySize;
+		// defensive copy
+		this.seatNumbers = (seatNumbers == null)
+				? new ArrayList<>()
+				: new ArrayList<>(seatNumbers);
+	}
+
+	// ========== VALIDATION HELPERS ==========
+
+	private static void validateName(String name) {
+		if (name == null || name.trim().isEmpty()) {
+			throw new IllegalArgumentException("Reservation name cannot be blank");
 		}
 	}
 
-	public String getName() {
-		synchronized (lock) {
-			return name;
+	private static void validateUsername(String username) {
+		if (username == null || username.trim().isEmpty()) {
+			throw new IllegalArgumentException("Reservation username cannot be blank");
 		}
+	}
+
+	private static void validateDate(String date) {
+		if (date == null || date.trim().isEmpty()) {
+			throw new IllegalArgumentException("Date cannot be blank");
+		}
+		// You could add a stricter regex here if you want (e.g., YYYY-MM-DD)
+	}
+
+	private static void validateTime(String time) {
+		if (time == null || time.trim().isEmpty()) {
+			throw new IllegalArgumentException("Time cannot be blank");
+		}
+		// Likewise, could enforce HH:MM with a regex if needed
+	}
+
+	private static void validatePartySize(int partySize) {
+		if (partySize <= 0) {
+			throw new IllegalArgumentException("Party size must be greater than 0");
+		}
+	}
+
+	private static void validateSeats(ArrayList<Integer> seats) {
+		if (seats == null) {
+			return; // we allow null / empty → no seats booked yet
+		}
+		for (Integer s : seats) {
+			if (s == null || s <= 0) {
+				throw new IllegalArgumentException("Seat numbers must be positive integers");
+			}
+		}
+	}
+
+	// ========== GETTERS / SETTERS ==========
+
+	public String getName() {
+		return name;
 	}
 
 	public String getUsername() {
-		synchronized (lock) {
-			return username;
-		}
+		return username;
 	}
 
 	public String getDate() {
-		synchronized (lock) {
-			return date;
-		}
+		return date;
 	}
 
 	public String getTime() {
-		synchronized (lock) {
-			return time;
-		}
+		return time;
 	}
 
 	// Needed for your test
 	public void setTime(String t) {
-		synchronized (lock) {
-			this.time = t;
-		}
+		validateTime(t);
+		this.time = t;
 	}
 
 	public int getPartySize() {
-		synchronized (lock) {
-			return partySize;
-		}
+		return partySize;
 	}
 
 	// For your unit test
 	public int getNumPeople() {
-		synchronized (lock) {
-			return partySize;
-		}
+		return partySize;
 	}
 
-	/**
-	 * Original accessor name kept for backwards compatibility.
-	 */
 	public ArrayList<Integer> getTheSeatNumbers() {
-		synchronized (lock) {
-			return new ArrayList<>(seatNumbers);
-		}
+		return new ArrayList<>(seatNumbers);
 	}
 
-	/**
-	 * Preferred accessor: returns a defensive copy of seat numbers.
-	 */
+	// NEW: alias method
 	public ArrayList<Integer> getSeats() {
-		synchronized (lock) {
-			return new ArrayList<>(seatNumbers);
-		}
+		return new ArrayList<>(seatNumbers);
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Reservation)) return false;
-		if (this == o) return true;
-
-		Reservation other = (Reservation) o;
-
-		// Take snapshots under each object's lock to avoid deadlock
-		String n1, u1, d1, t1;
-		int p1;
-		List<Integer> s1;
-
-		synchronized (this.lock) {
-			n1 = this.name;
-			u1 = this.username;
-			d1 = this.date;
-			t1 = this.time;
-			p1 = this.partySize;
-			s1 = new ArrayList<>(this.seatNumbers);
-		}
-
-		String n2, u2, d2, t2;
-		int p2;
-		List<Integer> s2;
-
-		synchronized (other.lock) {
-			n2 = other.name;
-			u2 = other.username;
-			d2 = other.date;
-			t2 = other.time;
-			p2 = other.partySize;
-			s2 = new ArrayList<>(other.seatNumbers);
-		}
-
-		return Objects.equals(n1, n2)
-				&& Objects.equals(u1, u2)
-				&& Objects.equals(d1, d2)
-				&& Objects.equals(t1, t2)
-				&& p1 == p2
-				&& Objects.equals(s1, s2);
-	}
-
-	@Override
-	public int hashCode() {
-		synchronized (lock) {
-			return Objects.hash(name, username, date, time, partySize, seatNumbers);
-		}
+		Reservation r = (Reservation) o;
+		return Objects.equals(name, r.name)
+				&& Objects.equals(username, r.username)
+				&& Objects.equals(date, r.date)
+				&& Objects.equals(time, r.time)
+				&& partySize == r.partySize
+				&& Objects.equals(seatNumbers, r.seatNumbers);
 	}
 
 	@Override
 	public String toString() {
-		synchronized (lock) {
-			return "Reservation for " + name + " @ " + date + " " + time + " for " + partySize;
-		}
+		return "Reservation for " + name + " @ " + date + " " + time + " for " + partySize;
 	}
 }

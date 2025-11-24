@@ -1,4 +1,3 @@
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -6,9 +5,6 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 
 public class ReservationTest {
-
-
-
 
     @Test
     public void testEqualsUsesAllFields() {
@@ -62,5 +58,82 @@ public class ReservationTest {
         assertTrue(s.contains("2025-03-10"));
         assertTrue(s.contains("20:15"));
         assertTrue(s.contains("2"));
+    }
+
+    // ---------- NEW: input validation tests ----------
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankNameNotAllowed() {
+        new Reservation(
+                "   ",            // blank name
+                "user",
+                "2025-01-01",
+                "19:00",
+                2,
+                new ArrayList<Integer>()
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankUsernameNotAllowed() {
+        new Reservation(
+                "Name",
+                "",               // blank username
+                "2025-01-01",
+                "19:00",
+                2,
+                new ArrayList<Integer>()
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankDateNotAllowed() {
+        new Reservation(
+                "Name",
+                "user",
+                "   ",            // blank date
+                "19:00",
+                2,
+                new ArrayList<Integer>()
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankTimeNotAllowed() {
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "",               // blank time
+                2,
+                new ArrayList<Integer>()
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPartySizeMustBePositive() {
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "19:00",
+                0,                // invalid party size
+                new ArrayList<Integer>()
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSeatNumbersMustBePositive() {
+        ArrayList<Integer> seats = new ArrayList<>();
+        seats.add(-1);             // invalid seat
+
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "19:00",
+                2,
+                seats
+        );
     }
 }

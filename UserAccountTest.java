@@ -1,5 +1,7 @@
 import org.junit.Test;
+
 import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 /**
@@ -8,7 +10,7 @@ import static org.junit.Assert.*;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author zhu1220, chan531, lab sec L23
- * @version November 8, 2025
+ * @version November 8, 2025 (validation tests added)
  */
 
 public class UserAccountTest {
@@ -46,7 +48,7 @@ public class UserAccountTest {
     @Test(timeout = 1000)
     public void testEqualsValidAndInvalid() {
         UserAccount acc = new UserAccount("user1", "pass123",
-                        "TestUser", "user1@example.com");
+                "TestUser", "user1@example.com");
 
         assertEquals("Correct username and password should return true",
                 new UserAccount("user1", "pass123", "asdf", "email@email.com"), acc);
@@ -61,12 +63,12 @@ public class UserAccountTest {
     @Test(timeout = 1000)
     public void testAddAndRemoveReservation() {
         UserAccount acc = new UserAccount("user1", "pass123",
-                        "TestUser", "user1@example.com");
+                "TestUser", "user1@example.com");
 
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(1);
         Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10",
-                            "18:30", 2, seats);
+                "18:30", 2, seats);
 
         assertTrue("addReservation should return true when added",
                 acc.addReservation(res));
@@ -84,10 +86,44 @@ public class UserAccountTest {
     @Test(timeout = 1000)
     public void testToString() {
         UserAccount acc = new UserAccount("user1", "pass123",
-                        "TestUser", "user1@example.com");
+                "TestUser", "user1@example.com");
         String s = acc.toString();
         assertNotNull("toString() should not return null", s);
         assertEquals("toString() should match expected format and content",
                 "UserAccount for TestUser, user1 - user1@example.com", s);
+    }
+
+    // ---------- NEW: validation tests ----------
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankUsernameNotAllowed() {
+        new UserAccount("   ", "pass123", "Name", "name@example.com");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankPasswordNotAllowed() {
+        new UserAccount("user1", "   ", "Name", "name@example.com");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankFullNameNotAllowed() {
+        new UserAccount("user1", "pass123", "   ", "name@example.com");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBlankEmailNotAllowed() {
+        new UserAccount("user1", "pass123", "Name", "   ");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidEmailNotAllowed() {
+        new UserAccount("user1", "pass123", "Name", "not-an-email");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetEmailInvalidThrows() {
+        UserAccount acc = new UserAccount("user1", "pass123",
+                "Name", "user1@example.com");
+        acc.setEmail("bad-email"); // should throw
     }
 }
