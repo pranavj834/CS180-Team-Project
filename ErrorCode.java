@@ -21,5 +21,5 @@ public enum ErrorCode implements Serializable {
     NOT_FOUND,
     CONFLICT,
     INSUFFICIENT_FUNDS,
-    INTERNAL_ERROR
+    INTERNAL_ERROR,
 }

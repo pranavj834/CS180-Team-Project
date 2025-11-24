@@ -11,13 +11,40 @@ import java.util.ArrayList;
 
 public class Reservation implements ReservationInterface {
 
-	//instance variables; variables are based on whatever is important to create reservations
+	// ================== PRICING CONFIG (STATIC) ==================
+
+	/** Base fee for any reservation. */
+	private static double basePrice = 0.0;
+
+	/** Extra charge per person. */
+	private static double perPersonPrice = 0.0;
+
+	/**
+	 * Configures the global pricing rule used for all reservations:
+	 *   total = basePrice + perPersonPrice * numPeople
+	 */
+	public static synchronized void configurePricing(double base, double perPerson) {
+		basePrice = base;
+		perPersonPrice = perPerson;
+	}
+
+	/**
+	 * Computes the total price for a party of size n using the
+	 * globally configured pricing rule.
+	 */
+	public static synchronized double computePrice(int numPeople) {
+		return basePrice + perPersonPrice * numPeople;
+	}
+
+	// ================== INSTANCE FIELDS ==================
+
 	private String name;
 	private String username;
-	private String date;
-	private String time;
-    private int numPeople;
+	private String date;       // "YYYY-MM-DD", e.g., "2025-01-01"
+	private String time;       // "HH:MM" 24h, e.g., "13:30"
+	private int numPeople;
 	private ArrayList<Integer> seats;
+	private double totalPrice; // computed from numPeople
 
 	//constructor; sets the respective instance variables based on their respective inputs given
 	public Reservation(String name, String username, String date,
@@ -26,33 +53,28 @@ public class Reservation implements ReservationInterface {
 		this.username = username;
 		this.date = date;
 		this.time = time;
-        this.numPeople = numPeople;
+		this.numPeople = numPeople;
 		this.seats = seats;
+		this.totalPrice = computePrice(numPeople);
 	}
 
-	//getters; returns the respective instance variables based on their respective inputs given
+	//getters
 	public synchronized String getName() { return name; }
 	public synchronized String getUsername() { return username; }
 	public synchronized String getDate() { return date; }
 	public synchronized String getTime() { return time; }
-	public synchronized int getNumPeople() {
-		return numPeople;
-	}
-	public synchronized ArrayList<Integer> getSeats() {
-		return seats;
-	}
+	public synchronized int getNumPeople() { return numPeople; }
+	public synchronized ArrayList<Integer> getSeats() { return seats; }
+	public synchronized double getTotalPrice() { return totalPrice; }
 
-	//setters; sets the respective instance variables based on their respective inputs given
+	//setters
 	public synchronized void setName(String name) { this.name = name; }
 	public synchronized void setUsername(String username) { this.username = username; }
-	public synchronized void setDate(String date) {
-		this.date = date;
-	}
-	public synchronized void setTime(String time) {
-		this.time = time;
-	}
+	public synchronized void setDate(String date) { this.date = date; }
+	public synchronized void setTime(String time) { this.time = time; }
 	public synchronized void setNumPeople(int numPeople) {
 		this.numPeople = numPeople;
+		this.totalPrice = computePrice(numPeople);
 	}
 	public synchronized void setSeats(ArrayList<Integer> seats) { this.seats = seats; }
 
@@ -74,14 +96,16 @@ public class Reservation implements ReservationInterface {
 		int tempNumPeople = reservation.getNumPeople();
 		ArrayList<Integer> tempSeats = reservation.getSeats();
 
-		if (name.equals(tempName) && username.equals(tempUsername) && date.equals(tempDate) &&
-				time.equals(tempTime) && numPeople == tempNumPeople && seats.equals(tempSeats)) {
-			return true;
-		}
-		return false;
+		return name.equals(tempName)
+				&& username.equals(tempUsername)
+				&& date.equals(tempDate)
+				&& time.equals(tempTime)
+				&& numPeople == tempNumPeople
+				&& seats.equals(tempSeats);
 	}
 
 	public String toString() {
-		return String.format("Reservation for %s @ %s %s for %d", name, date, time, numPeople);
+		return String.format("Reservation for %s @ %s %s for %d",
+				name, date, time, numPeople);
 	}
 }

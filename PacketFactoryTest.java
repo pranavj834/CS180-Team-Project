@@ -1,13 +1,9 @@
 import org.junit.Test;
+import static org.junit.Assert.*;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class PacketFactoryTest {
 
@@ -37,9 +33,9 @@ public class PacketFactoryTest {
 
     @Test
     public void testQuotePricePacketPayloadShape() {
-        List<String> seats = Arrays.asList("A1", "A2");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-        LocalTime time = LocalTime.of(18, 30);
+        List<Integer> seats = Arrays.asList(1, 2);
+        String date = "2025-01-01";
+        String time = "18:30";
         int partySize = 4;
 
         CommunicationPacket p = PacketFactory.quotePrice(seats, date, time, partySize);
@@ -49,7 +45,6 @@ public class PacketFactoryTest {
 
         Object[] arr = (Object[]) p.getPayload();
         assertEquals(4, arr.length);
-
         assertSame(seats, arr[0]);
         assertEquals(date, arr[1]);
         assertEquals(time, arr[2]);
@@ -73,13 +68,13 @@ public class PacketFactoryTest {
     }
 
     @Test
-    public void testHoldSeatsPacketEncodesDurationAsSeconds() {
-        List<String> seats = Collections.singletonList("B1");
-        LocalDate date = LocalDate.of(2025, 5, 10);
-        LocalTime time = LocalTime.of(19, 0);
-        Duration ttl = Duration.ofMinutes(15);
+    public void testHoldSeatsPacketUsesSecondsInt() {
+        List<Integer> seats = Collections.singletonList(5);
+        String date = "2025-05-10";
+        String time = "19:00";
+        int seconds = 900;
 
-        CommunicationPacket p = PacketFactory.holdSeats(date, time, seats, ttl);
+        CommunicationPacket p = PacketFactory.holdSeats(date, time, seats, seconds);
 
         assertEquals(PacketType.HOLD_SEATS, p.getPacketType());
         assertTrue(p.getPayload() instanceof Object[]);
@@ -89,8 +84,6 @@ public class PacketFactoryTest {
         assertEquals(date, arr[0]);
         assertEquals(time, arr[1]);
         assertSame(seats, arr[2]);
-
-        long seconds = (long) arr[3];
-        assertEquals(ttl.toSeconds(), seconds);
+        assertEquals(seconds, arr[3]);
     }
 }

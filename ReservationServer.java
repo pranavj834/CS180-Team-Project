@@ -1,37 +1,30 @@
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Core server-side logic for the restaurant reservation system.
  *
- * Holds shared state such as user accounts, reservations, seating layout,
- * and pricing rules. Provides thread-safe methods for handling
- * incoming CommunicationPacket requests.
+ * Holds shared state such as user accounts and reservations.
+ * Provides thread-safe methods for handling incoming
+ * CommunicationPacket requests.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author zhu1220, lab sec L23
- * @version November 8, 2025
+ * @version November 23, 2025
  */
 public class ReservationServer implements ReservationServerInterface {
 
-    // === Shared server state ===
-    private final Database database;          // your existing Database (UserAccount + Reservation)
-    private final Map<String, String> sessions; // sessionId -> username mapping
+    /** In-memory database of accounts and reservations. */
+    private final Database database;
 
     /**
      * Constructs the server state and loads initial configuration.
-     * You can load from files here if you want persistence.
      */
     public ReservationServer() {
-        this.database = new Database();           // your in-memory DB (Phase 1)
-        this.sessions = new HashMap<>();          // track active sessions
-
-        // TODO: load pricing / reservations from files if you want persistence
-        // e.g., Reservation.configurePricing(savedBase, savedPerPerson);
+        this.database = new Database();
+        // Default pricing: everything is free until SET_PRICE_RULE is called.
+        Reservation.configurePricing(0.0, 0.0);
     }
 
     /**
@@ -40,10 +33,10 @@ public class ReservationServer implements ReservationServerInterface {
      * @param req the request from a client
      * @return response to be sent back
      */
-    public CommunicationPacket handlePacket(CommunicationPacket req) {
+    @Override
+    public synchronized CommunicationPacket handlePacket(CommunicationPacket req) {
         CommunicationPacket res = new CommunicationPacket()
-                .setPacketType(req.getPacketType())
-                .setSessionId(req.getSessionId()); // echo sessionId back
+                .setPacketType(req.getPacketType());
 
         try {
             switch (req.getPacketType()) {
@@ -57,13 +50,20 @@ public class ReservationServer implements ReservationServerInterface {
                 case LOGOUT:
                     handleLogout(req, res);
                     break;
+                case GET_USER:
+                    handleGetUser(req, res);
+                    break;
 
-                // ---------- SEATING / LAYOUT ----------
+                // ---------- (LEGACY) LAYOUT / SECTIONS ----------
+                // We no longer track layout; these are simple stubs.
                 case LOCK_SECTION:
                     handleLockSection(req, res);
                     break;
 
                 // ---------- AVAILABILITY / BOOKING ----------
+                case GET_OPEN_SEATS:
+                    handleGetOpenSeats(req, res);
+                    break;
                 case HOLD_SEATS:
                     handleHoldSeats(req, res);
                     break;
@@ -101,7 +101,6 @@ public class ReservationServer implements ReservationServerInterface {
                             .setMessage("Unsupported packet type: " + req.getPacketType());
             }
         } catch (Exception e) {
-            // Any unhandled exception becomes an INTERNAL_ERROR
             res.setErrorCode(ErrorCode.INTERNAL_ERROR)
                     .setMessage("Server error: " + e.getMessage());
             e.printStackTrace();
@@ -110,158 +109,177 @@ public class ReservationServer implements ReservationServerInterface {
         return res;
     }
 
-    // ====================== AUTH HANDLERS ======================
+    // ============================================================
+    // ======================== AUTH ==============================
+    // ============================================================
 
-    private synchronized void handleRegister(CommunicationPacket req, CommunicationPacket res) {
-        String[] creds = (String[]) req.getPayload();       // [username, password]
+    /** Payload: String[]{username, password} */
+    private void handleRegister(CommunicationPacket req, CommunicationPacket res) {
+        String[] creds = (String[]) req.getPayload();
         String username = creds[0];
         String password = creds[1];
 
-        // TODO: check for duplicate usernames using your Database
+        // Use username for fullName and a dummy email for now.
+        UserAccount acct = new UserAccount(username, password, username, username + "@email.com");
 
-        res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Registered (stub)");
-        res.setPayload("Registered user: " + username);
-    }
-
-    private synchronized void handleLogin(CommunicationPacket req, CommunicationPacket res) {
-        String[] creds = (String[]) req.getPayload();       // [username, password]
-        String username = creds[0];
-        String password = creds[1];
-
-        // TODO: verify username/password using your UserAccount + Database
-
-        // Example: simple "always success" stub with generated session:
-        String sessionId = UUID.randomUUID().toString();
-        sessions.put(sessionId, username);                  // track session
-        res.setErrorCode(ErrorCode.NONE)
-                .setPayload(sessionId)                      // client expects sessionId in payload
-                .setMessage("Login OK (stub)");
-    }
-
-    private synchronized void handleLogout(CommunicationPacket req, CommunicationPacket res) {
-        String sessionId = req.getSessionId();
-        if (sessionId != null) {
-            sessions.remove(sessionId);                     // remove session mapping
+        boolean ok = database.addAccount(acct);
+        if (!ok) {
+            res.setErrorCode(ErrorCode.INVALID_INPUT)
+                    .setMessage("Account already exists");
+        } else {
+            res.setErrorCode(ErrorCode.NONE)
+                    .setPayload("Registered user: " + username)
+                    .setMessage("Registered");
         }
+    }
+
+    /** Payload: String[]{username, password} */
+    private void handleLogin(CommunicationPacket req, CommunicationPacket res) {
+        String[] creds = (String[]) req.getPayload();
+        String username = creds[0];
+        String password = creds[1];
+
+        for (UserAccount acct : database.getAccounts()) {
+            if (acct.getUsername().equals(username)
+                    && acct.getPassword().equals(password)) {
+                // No sessions; just say OK.
+                res.setErrorCode(ErrorCode.NONE)
+                        .setMessage("Login OK");
+                return;
+            }
+        }
+
+        res.setErrorCode(ErrorCode.AUTH_FAILED)
+                .setMessage("Invalid username or password");
+    }
+
+    private void handleLogout(CommunicationPacket req, CommunicationPacket res) {
+        // No session tracking; always "success".
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Logged out");
     }
 
-    // ================== SEATING / LAYOUT HANDLERS ================== TODO: remove layout
+    /** Payload: String username */
+    private void handleGetUser(CommunicationPacket req, CommunicationPacket res) {
+        String username = (String) req.getPayload();
 
-    private synchronized void handleLockSection(CommunicationPacket req, CommunicationPacket res) {
-        Object[] arr = (Object[]) req.getPayload();         // [sectionId, lockFlag]
-        String sectionId = (String) arr[0];
-        boolean lock = (boolean) arr[1];
+        for (UserAccount acct : database.getAccounts()) {
+            if (acct.getUsername().equals(username)) {
+                res.setErrorCode(ErrorCode.NONE)
+                        .setPayload(acct)
+                        .setMessage("User found");
+                return;
+            }
+        }
 
-        // TODO: update 'layout' so seats in this section become locked/unlocked.
-
-        res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Section " + sectionId + " lock=" + lock + " (stub)");
+        res.setErrorCode(ErrorCode.NOT_FOUND)
+                .setMessage("User not found");
     }
 
-    // ================== BOOKING / AVAILABILITY HANDLERS ==================
+    // ============================================================
+    // ============ (LEGACY) LAYOUT / SECTIONS (STUBS) ============
+    // ============================================================
 
-    private synchronized void handleHoldSeats(CommunicationPacket req, CommunicationPacket res) {
-        // [LocalDate, LocalTime, seatIds, ttlSeconds]
-        Object[] arr = (Object[]) req.getPayload();
-        LocalDate date = (LocalDate) arr[0];
-        LocalTime time = (LocalTime) arr[1];
-        @SuppressWarnings("unchecked")
-        List<String> seatIds = (List<String>) arr[2];
-        long ttlSeconds = (long) arr[3];
-
-        // TODO: implement actual temporary hold logic using (date, time, seatIds, ttlSeconds)
-
+    /** Payload: Object[]{String sectionId, boolean lock} */
+    private void handleLockSection(CommunicationPacket req, CommunicationPacket res) {
+        // Layout has been removed; acknowledge but do nothing.
         res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Seats held for ~" + ttlSeconds + " seconds (stub)");
+                .setMessage("Section lock/unlock ignored (layout disabled)");
     }
 
-    private synchronized void handleConfirmReservation(CommunicationPacket req, CommunicationPacket res) {
-        // [LocalDate, LocalTime, seatIds, partySize]
+    // ============================================================
+    // ================= AVAILABILITY / BOOKING ===================
+    // ============================================================
+
+    /** Payload: Object[]{String date, String time, int partySize} */
+    private void handleGetOpenSeats(CommunicationPacket req, CommunicationPacket res) {
         Object[] arr = (Object[]) req.getPayload();
-        LocalDate date = (LocalDate) arr[0];
-        LocalTime time = (LocalTime) arr[1];
+        String date = (String) arr[0]; // "2025-01-01"
+        String time = (String) arr[1]; // "13:30"
+        int partySize = (int) arr[2];
+
+        // No layout → we can't compute real availability yet.
+        // Return an empty list stub.
+        List<Integer> openSeats = new ArrayList<>();
+
+        res.setErrorCode(ErrorCode.NONE)
+                .setPayload(openSeats)
+                .setMessage("Open seats for " + date + " " + time + " (stub)");
+    }
+
+    /** Payload: Object[]{String date, String time, List<Integer> seats, int holdSeconds} */
+    private void handleHoldSeats(CommunicationPacket req, CommunicationPacket res) {
+        Object[] arr = (Object[]) req.getPayload();
+        String date = (String) arr[0];
+        String time = (String) arr[1];
         @SuppressWarnings("unchecked")
-        List<String> seatIds = (List<String>) arr[2];
+        List<Integer> seats = (List<Integer>) arr[2];
+        int seconds = (int) arr[3];
+
+        // No real hold tracking; just say OK.
+        res.setErrorCode(ErrorCode.NONE)
+                .setMessage("Held seats " + seats + " for ~" + seconds + "s (stub) on " + date + " " + time);
+    }
+
+    /** Payload: Object[]{String date, String time, List<Integer> seats, int partySize} */
+    private void handleConfirmReservation(CommunicationPacket req, CommunicationPacket res) {
+        Object[] arr = (Object[]) req.getPayload();
+        String date = (String) arr[0];
+        String time = (String) arr[1];
+        @SuppressWarnings("unchecked")
+        List<Integer> seatNums = (List<Integer>) arr[2];
         int partySize = (int) arr[3];
 
-        String sessionId = req.getSessionId();
-        String username = sessions.get(sessionId);          // find username for this session
+        // For now, we don't know which user is logged in, so use a generic guest.
+        ArrayList<Integer> seatsCopy = new ArrayList<>(seatNums);
 
-        if (username == null) {
-            res.setErrorCode(ErrorCode.NOT_AUTHORIZED)
-                    .setMessage("Not logged in");
-            return;
-        }
+        Reservation reservation = new Reservation(
+                "Guest",          // name
+                "guest",          // username
+                date,             // "YYYY-MM-DD"
+                time,             // "HH:MM"
+                partySize,
+                seatsCopy
+        );
 
-        // Convert date/time to Strings (Reservation uses String for these)
-        String dateString = date.toString();
-        String timeString = time.toString();
-
-        // Stub: convert seatIds to numeric seat numbers (or leave empty for now)
-        ArrayList<Integer> seatNumbers = new ArrayList<>();
-        // TODO: real mapping from seatId -> seatNumber if needed
-
-        // For now, use username as "name" as well; you can add a real name field later
-        Reservation reservation = new Reservation(username, username, dateString, timeString, partySize, seatNumbers);
-
-        // TODO: add to database structure (associate with this username)
-        // Example:
-        // UserAccount acct = database.getUser(username);
-        // if (acct != null) {
-        //     acct.addReservation(reservation);
-        // }
-
+        // We could add this to the database under a dummy account if desired,
+        // but for now we just return it.
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(reservation)
-                .setMessage("Reservation confirmed");
+                .setMessage("Reservation confirmed (stub)");
     }
 
-    private synchronized void handleCancelReservation(CommunicationPacket req, CommunicationPacket res) {
-        String reservationId = (String) req.getPayload();
-
-        // TODO: find and remove reservation by ID
-        // (Depends on how you identify reservations in your Database.)
-
+    /** Payload: String reservationId (unused for now) */
+    private void handleCancelReservation(CommunicationPacket req, CommunicationPacket res) {
+        // We don't have IDs wired up yet, so this is a stub.
         res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Reservation " + reservationId + " cancelled (stub)");
+                .setMessage("Reservation cancelled (stub)");
     }
 
-    private synchronized void handleGetReservations(CommunicationPacket req, CommunicationPacket res) {
-        String sessionId = req.getSessionId();
-        String username = sessions.get(sessionId);
-
-        if (username == null) {
-            res.setErrorCode(ErrorCode.NOT_AUTHORIZED)
-                    .setMessage("Not logged in");
-            return;
-        }
-
-        // TODO: query Database for all reservations belonging to this username.
-        List<Reservation> myRes = new ArrayList<>();
-
-        // Example if Database supports it:
-        // UserAccount acct = database.getUser(username);
-        // if (acct != null) {
-        //     myRes = acct.getReservations();
-        // }
+    /** Payload: none */
+    private void handleGetReservations(CommunicationPacket req, CommunicationPacket res) {
+        // No per-user tracking right now; just return all reservations in DB.
+        List<Reservation> all = database.getReservations();
 
         res.setErrorCode(ErrorCode.NONE)
-                .setPayload(myRes)
+                .setPayload(all)
                 .setMessage("Reservations retrieved (stub)");
     }
 
-    // ====================== PRICING HANDLERS ======================
+    // ============================================================
+    // ========================= PRICING ==========================
+    // ============================================================
 
-    private synchronized void handleQuotePrice(CommunicationPacket req, CommunicationPacket res) {
-        // [seatIds, LocalDate, LocalTime, partySize]
+    /**
+     * Payload: Object[]{List<Integer> seats, String date, String time, int partySize}
+     *
+     * Right now, we ignore seats/date/time and just price by partySize using
+     * Reservation.computePrice().
+     */
+    private void handleQuotePrice(CommunicationPacket req, CommunicationPacket res) {
         Object[] arr = (Object[]) req.getPayload();
-        // We ignore seatIds/date/time for now and just price by party size
         int partySize = (int) arr[3];
 
-        // Use Reservation's simple pricing rule
         double price = Reservation.computePrice(partySize);
 
         res.setErrorCode(ErrorCode.NONE)
@@ -269,8 +287,12 @@ public class ReservationServer implements ReservationServerInterface {
                 .setMessage("Quote computed");
     }
 
-    private synchronized void handleSetPriceRule(CommunicationPacket req, CommunicationPacket res) {
-        // Payload: [Double basePrice, Double perPersonPrice]
+    /**
+     * Payload: Object[]{Double basePrice, Double perPersonPrice}
+     *
+     * This updates the static pricing rule stored in Reservation.
+     */
+    private void handleSetPriceRule(CommunicationPacket req, CommunicationPacket res) {
         Object payload = req.getPayload();
 
         if (!(payload instanceof Object[])) {
@@ -283,59 +305,35 @@ public class ReservationServer implements ReservationServerInterface {
         double base = (double) arr[0];
         double perPerson = (double) arr[1];
 
-        // Update global pricing config in Reservation
         Reservation.configurePricing(base, perPerson);
 
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Price rule updated");
     }
 
-    // ======================= PAYMENT HANDLERS =======================
+    // ============================================================
+    // ========================= PAYMENT ==========================
+    // ============================================================
 
-    private synchronized void handleDeposit(CommunicationPacket req, CommunicationPacket res) {
+    /** Payload: Double amount */
+    private void handleDeposit(CommunicationPacket req, CommunicationPacket res) {
         double amount = (double) req.getPayload();
-        String username = sessions.get(req.getSessionId());
-
-        if (username == null) {
-            res.setErrorCode(ErrorCode.NOT_AUTHORIZED)
-                    .setMessage("Not logged in");
-            return;
-        }
-
-        // TODO: update user's balance in Database
-
+        // No real wallet tracking yet.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Deposited " + amount + " (stub)");
     }
 
-    private synchronized void handleWithdraw(CommunicationPacket req, CommunicationPacket res) {
+    /** Payload: Double amount */
+    private void handleWithdraw(CommunicationPacket req, CommunicationPacket res) {
         double amount = (double) req.getPayload();
-        String username = sessions.get(req.getSessionId());
-
-        if (username == null) {
-            res.setErrorCode(ErrorCode.NOT_AUTHORIZED)
-                    .setMessage("Not logged in");
-            return;
-        }
-
-        // TODO: check balance and subtract if possible
-
+        // No real wallet tracking yet.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Withdrew " + amount + " (stub)");
     }
 
-    private synchronized void handleGetBalance(CommunicationPacket req, CommunicationPacket res) {
-        String username = sessions.get(req.getSessionId());
-
-        if (username == null) {
-            res.setErrorCode(ErrorCode.NOT_AUTHORIZED)
-                    .setMessage("Not logged in");
-            return;
-        }
-
-        // TODO: lookup user balance in Database.
+    /** Payload: none */
+    private void handleGetBalance(CommunicationPacket req, CommunicationPacket res) {
         double balance = 0.0; // stub
-
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(balance)
                 .setMessage("Balance retrieved");

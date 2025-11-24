@@ -1,5 +1,4 @@
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 public class CommunicationPacketTest {
@@ -9,13 +8,11 @@ public class CommunicationPacketTest {
         CommunicationPacket packet = new CommunicationPacket()
                 .setPacketType(PacketType.LOGIN)
                 .setPayload("payload")
-                .setSessionId("session-123")
                 .setErrorCode(ErrorCode.INVALID_INPUT)
                 .setMessage("Bad input");
 
         assertEquals(PacketType.LOGIN, packet.getPacketType());
         assertEquals("payload", packet.getPayload());
-        assertEquals("session-123", packet.getSessionId());
         assertEquals(ErrorCode.INVALID_INPUT, packet.getErrorCode());
         assertEquals("Bad input", packet.getMessage());
     }
@@ -27,8 +24,7 @@ public class CommunicationPacketTest {
 
         assertNotNull(p1.getRequestId());
         assertNotNull(p2.getRequestId());
-        assertNotEquals("Each packet should have a unique requestId",
-                p1.getRequestId(), p2.getRequestId());
+        assertNotEquals(p1.getRequestId(), p2.getRequestId());
     }
 
     @Test

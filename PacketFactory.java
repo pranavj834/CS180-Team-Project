@@ -1,16 +1,8 @@
-import java.time.Duration;          // Duration is used to represent how long a seat hold should last
-import java.util.List;              // List is used for collections of seat IDs
+import java.util.List;
 
 /**
  * Utility class that builds {@link CommunicationPacket} objects for all
  * supported client→server operations.
- *
- * <p>Each static method corresponds to one high-level API call (such as logging
- * in, asking for open seats, or depositing money) and constructs a packet with
- * the correct {@link PacketType} and payload structure. This keeps packet
- * creation consistent and avoids copy-pasting boilerplate across the GUI.</p>
- *
- * It's essentially a helper class for building packets correctly.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
@@ -19,10 +11,9 @@ import java.util.List;              // List is used for collections of seat IDs
  */
 public final class PacketFactory {
 
-    /** Private constructor to prevent creating instances of this utility class. */
     private PacketFactory() { }
 
-    // ======================== AUTH ========================
+    // -------- AUTH --------
 
     public static CommunicationPacket register(String u, String p) {
         return new CommunicationPacket()
@@ -47,36 +38,26 @@ public final class PacketFactory {
                 .setPayload(username);
     }
 
-    // ================== SEATING / SECTIONS ===================
+    // -------- BOOKING --------
 
-    public static CommunicationPacket lockSection(String sectionId, boolean lock) {
-        return new CommunicationPacket()
-                .setPacketType(PacketType.LOCK_SECTION)
-                .setPayload(new Object[]{sectionId, lock});
-    }
-
-    // ============ AVAILABILITY / BOOKING ===================
-
-    public static CommunicationPacket getOpenSeats(LocalDate d, LocalTime t, int partySize) {
+    public static CommunicationPacket getOpenSeats(String date, String time, int partySize) {
         return new CommunicationPacket()
                 .setPacketType(PacketType.GET_OPEN_SEATS)
-                .setPayload(new Object[]{d, t, partySize});
+                .setPayload(new Object[]{date, time, partySize});
     }
 
-    public static CommunicationPacket holdSeats(LocalDate d, LocalTime t,
-                                                List<String> seatIds, Duration ttl) {
-        long seconds = (ttl == null ? 0L : ttl.toSeconds());
-
+    public static CommunicationPacket holdSeats(String date, String time,
+                                                List<Integer> seatNumbers, int holdSeconds) {
         return new CommunicationPacket()
                 .setPacketType(PacketType.HOLD_SEATS)
-                .setPayload(new Object[]{d, t, seatIds, seconds});
+                .setPayload(new Object[]{date, time, seatNumbers, holdSeconds});
     }
 
-    public static CommunicationPacket confirmReservation(LocalDate d, LocalTime t,
-                                                         List<String> seatIds, int partySize) {
+    public static CommunicationPacket confirmReservation(String date, String time,
+                                                         List<Integer> seatNumbers, int partySize) {
         return new CommunicationPacket()
                 .setPacketType(PacketType.CONFIRM_RESERVATION)
-                .setPayload(new Object[]{d, t, seatIds, partySize});
+                .setPayload(new Object[]{date, time, seatNumbers, partySize});
     }
 
     public static CommunicationPacket cancelReservation(String reservationId) {
@@ -90,31 +71,22 @@ public final class PacketFactory {
                 .setPacketType(PacketType.GET_RESERVATIONS);
     }
 
-    // ====================== PRICING =========================
+    // -------- PRICING --------
 
-    /**
-     * Builds a packet to request a price quote.
-     * Server currently only uses partySize in the logic, but we send seat/date/time
-     * too so it's easy to add more complex rules later.
-     */
-    public static CommunicationPacket quotePrice(List<String> seatIds, LocalDate d,
-                                                 LocalTime t, int partySize) {
+    public static CommunicationPacket quotePrice(List<Integer> seatNumbers,
+                                                 String date, String time, int partySize) {
         return new CommunicationPacket()
                 .setPacketType(PacketType.QUOTE_PRICE)
-                .setPayload(new Object[]{seatIds, d, t, partySize});
+                .setPayload(new Object[]{seatNumbers, date, time, partySize});
     }
 
-    /**
-     * Builds a packet to update the server's simple pricing rules:
-     *   totalPrice = basePrice + perPersonPrice * numPeople
-     */
     public static CommunicationPacket setPriceRule(double basePrice, double perPersonPrice) {
         return new CommunicationPacket()
                 .setPacketType(PacketType.SET_PRICE_RULE)
                 .setPayload(new Object[]{basePrice, perPersonPrice});
     }
 
-    // ======================= PAYMENT ========================
+    // -------- PAYMENT --------
 
     public static CommunicationPacket depositMoney(double amount) {
         return new CommunicationPacket()

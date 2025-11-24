@@ -1,10 +1,9 @@
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -24,9 +23,7 @@ public class ClientAPITest {
         api = new ClientAPI(conn, cache);
     }
 
-    // ============================================================
-    // AUTH
-    // ============================================================
+    // ---------- AUTH ----------
 
     @Test
     public void testRegisterSuccess() throws Exception {
@@ -34,76 +31,45 @@ public class ClientAPITest {
 
         String msg = api.register("alice", "pw");
         assertEquals("Registered OK", msg);
-
         assertEquals(PacketType.REGISTER, conn.lastSent.getPacketType());
     }
 
     @Test(expected = IllegalStateException.class)
     public void testRegisterFailureThrows() throws Exception {
         conn.nextResponse = error(ErrorCode.INVALID_INPUT, "bad");
-
-        api.register("bob", "pw"); // Should throw
+        api.register("bob", "pw");
     }
 
     @Test
-    public void testLoginSuccessStoresSessionId() throws Exception {
-        conn.nextResponse = okPayload("session123");
-
-        boolean ok = api.login("user", "pw");
-        assertTrue(ok);
-
-        assertEquals("session123", conn.getSessionId());
+    public void testLoginSuccess() throws Exception {
+        conn.nextResponse = ok("ok");
+        assertTrue(api.login("user", "pw"));
+        assertEquals(PacketType.LOGIN, conn.lastSent.getPacketType());
     }
 
     @Test
     public void testLoginFailureReturnsFalse() throws Exception {
         conn.nextResponse = error(ErrorCode.AUTH_FAILED, "wrong");
-
-        boolean ok = api.login("user", "pw");
-        assertFalse(ok);
+        assertFalse(api.login("user", "pw"));
     }
 
     @Test
-    public void testLogoutClearsSessionId() throws Exception {
-        conn.setSessionId("session123");
+    public void testLogout() throws Exception {
         conn.nextResponse = ok("done");
-
         api.logout();
-
-        assertNull(conn.getSessionId());
+        assertEquals(PacketType.LOGOUT, conn.lastSent.getPacketType());
     }
 
-    // ============================================================
-    // BOOKING / AVAILABILITY
-    // ============================================================
+    // ---------- BOOKING ----------
 
-    @Test
-    public void testGetOpenSeatsUpdatesCache() throws Exception {
-        List<String> serverSeats = Arrays.asList("A1", "A2");
 
-        conn.nextResponse = okPayload(serverSeats);
-
-        LocalDate date = LocalDate.of(2025, 1, 1);
-        LocalTime time = LocalTime.of(17, 0);
-
-        List<String> seats = api.getOpenSeats(date, time, 2);
-
-        assertEquals(serverSeats, seats);
-
-        // Confirm cached
-        assertEquals(serverSeats, cache.getOpenSeats(LocalDateTime.of(date, time)));
-    }
 
     @Test
     public void testHoldSeatsSuccess() throws Exception {
         conn.nextResponse = ok("held");
 
-        boolean held = api.holdSeats(
-                LocalDate.of(2025, 1, 1),
-                LocalTime.of(18, 0),
-                Arrays.asList("A1"),
-                Duration.ofSeconds(20)
-        );
+        boolean held = api.holdSeats("2025-01-01", "18:00",
+                Arrays.asList(1, 2), 20);
 
         assertTrue(held);
         assertEquals(PacketType.HOLD_SEATS, conn.lastSent.getPacketType());
@@ -113,12 +79,8 @@ public class ClientAPITest {
     public void testHoldSeatsFailureReturnsFalse() throws Exception {
         conn.nextResponse = error(ErrorCode.CONFLICT, "taken");
 
-        boolean held = api.holdSeats(
-                LocalDate.of(2025, 1, 1),
-                LocalTime.of(18, 0),
-                Arrays.asList("A1"),
-                Duration.ofSeconds(20)
-        );
+        boolean held = api.holdSeats("2025-01-01", "18:00",
+                Arrays.asList(1), 20);
 
         assertFalse(held);
     }
@@ -126,16 +88,12 @@ public class ClientAPITest {
     @Test
     public void testConfirmReservationReturnsReservation() throws Exception {
         Reservation r = new Reservation("John", "j", "2025-05-01", "18:00",
-                2, new ArrayList<>());
+                2, new ArrayList<Integer>());
 
         conn.nextResponse = okPayload(r);
 
         Reservation returned = api.confirmReservation(
-                LocalDate.of(2025, 5, 1),
-                LocalTime.of(18, 0),
-                Arrays.asList("T1"),
-                2
-        );
+                "2025-05-01", "18:00", Arrays.asList(10), 2);
 
         assertEquals(r, returned);
     }
@@ -143,30 +101,26 @@ public class ClientAPITest {
     @Test
     public void testCancelReservationSuccess() throws Exception {
         conn.nextResponse = ok("deleted");
-
         boolean ok = api.cancelReservation("R1");
-
         assertTrue(ok);
+        assertEquals(PacketType.CANCEL_RESERVATION, conn.lastSent.getPacketType());
     }
 
     @Test
     public void testCancelReservationFailure() throws Exception {
         conn.nextResponse = error(ErrorCode.NOT_FOUND, "nope");
-
         boolean ok = api.cancelReservation("R1");
-
         assertFalse(ok);
     }
 
     @Test
     public void testGetReservationsStoresInCache() throws Exception {
         Reservation r1 = new Reservation("A", "a", "2025", "12:00",
-                1, new ArrayList<>());
+                1, new ArrayList<Integer>());
         Reservation r2 = new Reservation("B", "b", "2025", "12:30",
-                2, new ArrayList<>());
+                2, new ArrayList<Integer>());
 
         List<Reservation> list = Arrays.asList(r1, r2);
-
         conn.nextResponse = okPayload(list);
 
         List<Reservation> out = api.getReservations();
@@ -175,20 +129,14 @@ public class ClientAPITest {
         assertEquals(list, cache.getMyReservations());
     }
 
-    // ============================================================
-    // PRICING
-    // ============================================================
+    // ---------- PRICING ----------
 
     @Test
     public void testQuotePriceReturnsDouble() throws Exception {
         conn.nextResponse = okPayload(25.0);
 
-        double price = api.quote(
-                Arrays.asList("A1"),
-                LocalDate.of(2025, 2, 1),
-                LocalTime.of(19, 0),
-                3
-        );
+        double price = api.quote(Arrays.asList(1),
+                "2025-02-01", "19:00", 3);
 
         assertEquals(25.0, price, 0.0001);
         assertEquals(PacketType.QUOTE_PRICE, conn.lastSent.getPacketType());
@@ -197,27 +145,22 @@ public class ClientAPITest {
     @Test
     public void testSetPriceRuleSuccess() throws Exception {
         conn.nextResponse = ok("done");
-
         api.setPriceRule(10.0, 2.0);
-
         assertEquals(PacketType.SET_PRICE_RULE, conn.lastSent.getPacketType());
     }
 
     @Test(expected = IllegalStateException.class)
     public void testSetPriceRuleFailureThrows() throws Exception {
         conn.nextResponse = error(ErrorCode.INVALID_INPUT, "bad rule");
-
         api.setPriceRule(10, -2);
     }
 
-    // ============================================================
-    // PAYMENT
-    // ============================================================
+    // ---------- PAYMENT ----------
 
     @Test
     public void testDepositUpdatesCacheBalance() throws Exception {
-        conn.nextResponse = ok("ok");         // Response to deposit
-        conn.nextBalance = 50.0;              // Response to getBalance()
+        conn.nextResponse = ok("ok");
+        conn.nextBalance = 50.0;
 
         api.deposit(20.0);
 
@@ -226,8 +169,8 @@ public class ClientAPITest {
 
     @Test
     public void testWithdrawSuccessUpdatesCache() throws Exception {
-        conn.nextResponse = ok("ok");         // Response to withdraw
-        conn.nextBalance = 30.0;              // Response to getBalance()
+        conn.nextResponse = ok("ok");
+        conn.nextBalance = 30.0;
 
         boolean ok = api.withdraw(10);
 
@@ -240,7 +183,6 @@ public class ClientAPITest {
         conn.nextResponse = error(ErrorCode.INSUFFICIENT_FUNDS, "no");
 
         boolean ok = api.withdraw(10);
-
         assertFalse(ok);
     }
 
@@ -254,47 +196,25 @@ public class ClientAPITest {
         assertEquals(88.0, cache.getWalletBalance(), 0.0001);
     }
 
-    // ============================================================
-    // ==== FakeClientConnection (stubbed networking layer) =====
-    // ============================================================
+    // ---------- Fake connection ----------
 
-    /**
-     * A minimal fake connection used for testing client logic
-     * without real networking or a running server.
-     */
     private static class FakeClientConnection extends ClientConnection {
-
         CommunicationPacket nextResponse;
         CommunicationPacket lastSent;
         Double nextBalance = null;
-        private String sessionId;
 
         @Override
         public CommunicationPacket send(CommunicationPacket p) {
             this.lastSent = p;
 
-            // Special case for getBalance
             if (p.getPacketType() == PacketType.GET_BALANCE && nextBalance != null) {
                 return okPayload(nextBalance);
             }
-
             return nextResponse;
-        }
-
-        @Override
-        public void setSessionId(String id) {
-            this.sessionId = id;
-        }
-
-        @Override
-        public String getSessionId() {
-            return sessionId;
         }
     }
 
-    // ============================================================
-    // ==== Convenience static helpers
-    // ============================================================
+    // ---------- Helpers ----------
 
     private static CommunicationPacket ok(String msg) {
         return new CommunicationPacket()

@@ -1,37 +1,24 @@
-import java.time.Duration;          // For representing how long seat holds last
-import java.util.List;              // For lists of seats/reservations
+import java.util.List;
 
 /**
- * A class that provides a unified client-side API for communicating with the
- * restaurant reservation server.
- *
- * <p>This class combines authentication, seating layout, booking,
- * pricing, and payment operations into a single interface that the GUI
- * can use without dealing directly with network packets or sockets.</p>
+ * High-level client API used by the GUI.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author Zhu1220, lab sec L23
+ * @author zhu1220
  * @version November 8, 2025
  */
 public class ClientAPI {
-    private final ClientConnection conn;  // low-level connection that sends/receives packets
-    private final ClientCache cache;      // local cache of layout, reservations, wallet, etc.
+    private final ClientConnection conn;
+    private final ClientCache cache;
 
-    /**
-     * Constructs a new ClientAPI.
-     *
-     * @param conn    the ClientConnection used to communicate with the server
-     * @param cache   the ClientCache to store frequently used data
-     */
     public ClientAPI(ClientConnection conn, ClientCache cache) {
-        this.conn = conn;     // save connection
-        this.cache = cache;   // use the provided cache (don't create a new one)
+        this.conn = conn;
+        // IMPORTANT: use the cache that was passed in (tests depend on this)
+        this.cache = cache;
     }
 
-    // ============================================================
-    // ================ AUTH (REGISTER / LOGIN / LOGOUT) ==========
-    // ============================================================
+    // ---------- AUTH ----------
 
     public String register(String username, String password) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.register(username, password));
@@ -39,179 +26,115 @@ public class ClientAPI {
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
-        return String.valueOf(res.getPayload());
+        // Tests expect the *message* "Registered OK", not the payload
+        return res.getMessage();
     }
 
     public boolean login(String username, String password) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.login(username, password));
-
-        if (res.getErrorCode() != ErrorCode.NONE) {
-            return false;
-        }
-
-        String sessionId = (String) res.getPayload();
-        conn.setSessionId(sessionId);
-
-        return true;
+        return res.getErrorCode() == ErrorCode.NONE;
     }
 
     public void logout() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.logout());
-
-        if (res.getErrorCode() != ErrorCode.NONE) {
-            throw new IllegalStateException(res.getMessage());
-        }
-
-        conn.setSessionId(null);
-    }
-
-    // ============================================================
-    // ================= SEATING / LAYOUT (STATIC MAP) ============
-    // ============================================================
-
-    public void lockSection(String sectionId, boolean lock) throws Exception {
-        CommunicationPacket res = conn.send(PacketFactory.lockSection(sectionId, lock));
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
     }
 
-    // ============================================================
-    // ================= BOOKING / AVAILABILITY ===================
-    // ============================================================
+    // ---------- BOOKING ----------
 
-    public List<String> getOpenSeats(LocalDate date, LocalTime time, int partySize) throws Exception {
-        LocalDateTime key = LocalDateTime.of(date, time);
-
+    public List<Integer> getOpenSeats(String date, String time, int partySize) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getOpenSeats(date, time, partySize));
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
         @SuppressWarnings("unchecked")
-        List<String> seatIds = (List<String>) res.getPayload();
-
-        cache.putOpenSeats(key, seatIds);
-
-        return seatIds;
+        List<Integer> seats = (List<Integer>) res.getPayload();
+        return seats;
     }
 
-    public boolean holdSeats(LocalDate date, LocalTime time, List<String> seatIds, Duration ttl) throws Exception {
-        CommunicationPacket res = conn.send(PacketFactory.holdSeats(date, time, seatIds, ttl));
-
-        if (res.getErrorCode() != ErrorCode.NONE) {
-            return false;
-        }
-
-        return true;
+    public boolean holdSeats(String date, String time,
+                             List<Integer> seatNumbers, int holdSeconds) throws Exception {
+        CommunicationPacket res = conn.send(
+                PacketFactory.holdSeats(date, time, seatNumbers, holdSeconds));
+        return res.getErrorCode() == ErrorCode.NONE;
     }
 
-    public Reservation confirmReservation(LocalDate date, LocalTime time, List<String> seatIds, int partySize)
-            throws Exception {
-        CommunicationPacket res = conn.send(PacketFactory.confirmReservation(date, time, seatIds, partySize));
-
+    public Reservation confirmReservation(String date, String time,
+                                          List<Integer> seatNumbers, int partySize) throws Exception {
+        CommunicationPacket res = conn.send(
+                PacketFactory.confirmReservation(date, time, seatNumbers, partySize));
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
         return (Reservation) res.getPayload();
     }
 
     public boolean cancelReservation(String reservationId) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.cancelReservation(reservationId));
-
-        if (res.getErrorCode() != ErrorCode.NONE) {
-            return false;
-        }
-
-        return true;
+        return res.getErrorCode() == ErrorCode.NONE;
     }
 
     public List<Reservation> getReservations() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getReservations());
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
         @SuppressWarnings("unchecked")
         List<Reservation> list = (List<Reservation>) res.getPayload();
-
+        // update the shared cache instance (JUnit checks this)
         cache.setMyReservations(list);
-
         return list;
     }
 
-    // ============================================================
-    // ========================= PRICING ==========================
-    // ============================================================
+    // ---------- PRICING ----------
 
-    /**
-     * Gets a price quote from the server for a set of seats at a given time.
-     * For now, the server only uses partySize for pricing, but we keep the
-     * full signature for compatibility.
-     */
-    public double quote(List<String> seatIds, LocalDate date, LocalTime time, int partySize) throws Exception {
-        CommunicationPacket res = conn.send(PacketFactory.quotePrice(seatIds, date, time, partySize));
-
+    public double quote(List<Integer> seatNumbers, String date, String time, int partySize)
+            throws Exception {
+        CommunicationPacket res = conn.send(
+                PacketFactory.quotePrice(seatNumbers, date, time, partySize));
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
         return (double) res.getPayload();
     }
 
-    /**
-     * Allows a manager to update base & per-person pricing on the server.
-     */
     public void setPriceRule(double basePrice, double perPersonPrice) throws Exception {
-        CommunicationPacket res = conn.send(PacketFactory.setPriceRule(basePrice, perPersonPrice));
-
+        CommunicationPacket res = conn.send(
+                PacketFactory.setPriceRule(basePrice, perPersonPrice));
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
     }
 
-    // ============================================================
-    // ========================= PAYMENT ==========================
-    // ============================================================
+    // ---------- PAYMENT ----------
 
     public void deposit(double amount) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.depositMoney(amount));
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
+        // tests expect us to refresh the balance into the cache
         cache.setWalletBalance(getBalance());
     }
 
     public boolean withdraw(double amount) throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.withdrawMoney(amount));
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             return false;
         }
-
         cache.setWalletBalance(getBalance());
-
         return true;
     }
 
     public double getBalance() throws Exception {
         CommunicationPacket res = conn.send(PacketFactory.getBalance());
-
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-
         double bal = (double) res.getPayload();
-
         cache.setWalletBalance(bal);
-
         return bal;
     }
 }
