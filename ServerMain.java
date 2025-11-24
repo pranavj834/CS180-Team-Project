@@ -18,7 +18,7 @@ import java.net.Socket;
  * @author zhu1220
  * @version November 20, 2025
  */
-public class ServerMain implements Runnable, ServerMainInterface {
+public class ServerMain implements Runnable, ServerMainInterface  {
 
     /** Port number the server listens on. */
     public static final int PORT = 500;
