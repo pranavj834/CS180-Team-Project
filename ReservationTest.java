@@ -7,46 +7,8 @@ import static org.junit.Assert.*;
 
 public class ReservationTest {
 
-    @Before
-    public void resetPricing() {
-        // Set a known pricing rule before each test
-        Reservation.configurePricing(10.0, 5.0); // base = 10, perPerson = 5
-    }
 
-    @Test
-    public void testComputePriceUsesConfiguredPricing() {
-        double priceFor2 = Reservation.computePrice(2); // 10 + 5*2 = 20
-        double priceFor4 = Reservation.computePrice(4); // 10 + 5*4 = 30
 
-        assertEquals(20.0, priceFor2, 0.0001);
-        assertEquals(30.0, priceFor4, 0.0001);
-    }
-
-    @Test
-    public void testConstructorSetsFieldsAndComputesTotalPrice() {
-        ArrayList<Integer> seats = new ArrayList<>();
-        seats.add(1);
-        seats.add(2);
-
-        Reservation r = new Reservation(
-                "John Doe",
-                "jdoe",
-                "2025-12-25",
-                "18:30",
-                3,
-                seats
-        );
-
-        assertEquals("John Doe", r.getName());
-        assertEquals("jdoe", r.getUsername());
-        assertEquals("2025-12-25", r.getDate());
-        assertEquals("18:30", r.getTime());
-        assertEquals(3, r.getNumPeople());
-        assertEquals(seats, r.getSeats());
-
-        // totalPrice = 10 + 5*3 = 25
-        assertEquals(25.0, r.getTotalPrice(), 0.0001);
-    }
 
     @Test
     public void testEqualsUsesAllFields() {

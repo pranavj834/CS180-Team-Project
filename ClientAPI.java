@@ -4,9 +4,6 @@ import java.util.List;
  * High-level client API used by the GUI.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
- *
- * @author zhu1220
- * @version November 8, 2025
  */
 public class ClientAPI {
     private final ClientConnection conn;
@@ -14,7 +11,7 @@ public class ClientAPI {
 
     public ClientAPI(ClientConnection conn, ClientCache cache) {
         this.conn = conn;
-        // IMPORTANT: use the cache passed in from tests / GUI
+        // IMPORTANT: use the cache passed in (tests rely on this)
         this.cache = cache;
     }
 
@@ -26,7 +23,7 @@ public class ClientAPI {
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // Tests expect the message string, not payload
+        // Tests expect the message string
         return res.getMessage();
     }
 
@@ -87,7 +84,7 @@ public class ClientAPI {
         return list;
     }
 
-    // ---------- PRICING ----------
+    // ---------- PRICING (client-side only; server may stub) ----------
 
     public double quote(List<Integer> seatNumbers, String date, String time, int partySize)
             throws Exception {
@@ -114,7 +111,7 @@ public class ClientAPI {
         if (res.getErrorCode() != ErrorCode.NONE) {
             throw new IllegalStateException(res.getMessage());
         }
-        // After deposit, refresh from server and update cache
+        // refresh from server (FakeClientConnection in tests handles this)
         cache.setWalletBalance(getBalance());
     }
 
@@ -123,7 +120,6 @@ public class ClientAPI {
         if (res.getErrorCode() != ErrorCode.NONE) {
             return false;
         }
-        // On success, refresh from server and update cache
         cache.setWalletBalance(getBalance());
         return true;
     }

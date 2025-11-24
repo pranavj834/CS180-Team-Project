@@ -9,9 +9,6 @@ import java.util.List;
  * CommunicationPacket requests.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
- *
- * @author zhu1220, lab sec L23
- * @version November 23, 2025
  */
 public class ReservationServer implements ReservationServerInterface {
 
@@ -19,11 +16,10 @@ public class ReservationServer implements ReservationServerInterface {
     private final Database database;
 
     /**
-     * Constructs the server state and loads initial configuration.
+     * Constructs the server state.
      */
     public ReservationServer() {
         this.database = new Database();
-        // Pricing is no longer handled by the server.
     }
 
     /**
@@ -54,7 +50,6 @@ public class ReservationServer implements ReservationServerInterface {
                     break;
 
                 // ---------- (LEGACY) LAYOUT / SECTIONS ----------
-                // We no longer track layout; these are simple stubs.
                 case LOCK_SECTION:
                     handleLockSection(req, res);
                     break;
@@ -76,7 +71,7 @@ public class ReservationServer implements ReservationServerInterface {
                     handleGetReservations(req, res);
                     break;
 
-                // ---------- PAYMENT (still stubbed) ----------
+                // ---------- PAYMENT ----------
                 case DEPOSIT_MONEY:
                     handleDeposit(req, res);
                     break;
@@ -110,7 +105,6 @@ public class ReservationServer implements ReservationServerInterface {
         String username = creds[0];
         String password = creds[1];
 
-        // Use username for fullName and a dummy email for now.
         UserAccount acct = new UserAccount(username, password, username, username + "@email.com");
 
         boolean ok = database.addAccount(acct);
@@ -119,8 +113,7 @@ public class ReservationServer implements ReservationServerInterface {
                     .setMessage("Account already exists");
         } else {
             res.setErrorCode(ErrorCode.NONE)
-                    .setPayload("Registered user: " + username)
-                    .setMessage("Registered");
+                    .setMessage("Registered OK");
         }
     }
 
@@ -133,7 +126,6 @@ public class ReservationServer implements ReservationServerInterface {
         for (UserAccount acct : database.getAccounts()) {
             if (acct.getUsername().equals(username)
                     && acct.getPassword().equals(password)) {
-                // No sessions; just say OK.
                 res.setErrorCode(ErrorCode.NONE)
                         .setMessage("Login OK");
                 return;
@@ -145,7 +137,6 @@ public class ReservationServer implements ReservationServerInterface {
     }
 
     private void handleLogout(CommunicationPacket req, CommunicationPacket res) {
-        // No session tracking; always "success".
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Logged out");
     }
@@ -185,17 +176,16 @@ public class ReservationServer implements ReservationServerInterface {
     /** Payload: Object[]{String date, String time, int partySize} */
     private void handleGetOpenSeats(CommunicationPacket req, CommunicationPacket res) {
         Object[] arr = (Object[]) req.getPayload();
-        String date = (String) arr[0]; // "2025-01-01"
-        String time = (String) arr[1]; // "13:30"
+        String date = (String) arr[0];
+        String time = (String) arr[1];
         int partySize = (int) arr[2];
 
-        // No layout → we can't compute real availability yet.
-        // Return an empty list stub.
+        // No real seat map yet → return empty list stub.
         List<Integer> openSeats = new ArrayList<>();
 
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(openSeats)
-                .setMessage("Open seats for " + date + " " + time + " (stub)");
+                .setMessage("Open seats for " + date + " " + time + " (stub, no layout)");
     }
 
     /** Payload: Object[]{String date, String time, List<Integer> seats, int holdSeconds} */
@@ -207,9 +197,8 @@ public class ReservationServer implements ReservationServerInterface {
         List<Integer> seats = (List<Integer>) arr[2];
         int seconds = (int) arr[3];
 
-        // No real hold tracking; just say OK.
         res.setErrorCode(ErrorCode.NONE)
-                .setMessage("Held seats " + seats + " for ~" + seconds + "s (stub) on " + date + " " + time);
+                .setMessage("Held seats " + seats + " for ~" + seconds + "s on " + date + " " + time + " (stub)");
     }
 
     /** Payload: Object[]{String date, String time, List<Integer> seats, int partySize} */
@@ -218,54 +207,45 @@ public class ReservationServer implements ReservationServerInterface {
         String date = (String) arr[0];
         String time = (String) arr[1];
         @SuppressWarnings("unchecked")
-        List<Integer> seatNums = (List<Integer>) arr[2];
+        ArrayList<Integer> seats = new ArrayList<>((List<Integer>) arr[2]);
         int partySize = (int) arr[3];
 
-        ArrayList<Integer> seatsCopy = new ArrayList<>(seatNums);
-
+        // For now we don't have session tracking; store under a generic guest.
         Reservation reservation = new Reservation(
-                "Guest",          // name
-                "guest",          // username
-                date,             // "YYYY-MM-DD"
-                time,             // "HH:MM"
+                "Guest",
+                "guest",
+                date,
+                time,
                 partySize,
-                seatsCopy
+                seats
         );
 
-        // Add under a dummy "guest" account so GET_RESERVATIONS returns something.
-        UserAccount guest = null;
-        for (UserAccount ua : database.getAccounts()) {
-            if (ua.getUsername().equals("guest")) {
-                guest = ua;
+        // Optionally add to DB under a dummy account if it exists.
+        for (UserAccount acct : database.getAccounts()) {
+            if (acct.getUsername().equals("guest")) {
+                database.addReservation(acct, reservation);
                 break;
             }
         }
-        if (guest == null) {
-            guest = new UserAccount("guest", "guest", "Guest", "guest@email.com");
-            database.addAccount(guest);
-        }
-        database.addReservation(guest, reservation);
 
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(reservation)
-                .setMessage("Reservation confirmed");
+                .setMessage("Reservation confirmed (stub)");
     }
 
     /** Payload: String reservationId (unused for now) */
     private void handleCancelReservation(CommunicationPacket req, CommunicationPacket res) {
-        // We don't have reservation IDs wired up yet, so this is still a stub.
+        // No IDs wired up yet → stub.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Reservation cancelled (stub)");
     }
 
     /** Payload: none */
     private void handleGetReservations(CommunicationPacket req, CommunicationPacket res) {
-        // No per-user tracking right now; just return all reservations in DB.
         List<Reservation> all = database.getReservations();
-
         res.setErrorCode(ErrorCode.NONE)
                 .setPayload(all)
-                .setMessage("Reservations retrieved (stub)");
+                .setMessage("Reservations retrieved");
     }
 
     // ============================================================
@@ -275,7 +255,7 @@ public class ReservationServer implements ReservationServerInterface {
     /** Payload: Double amount */
     private void handleDeposit(CommunicationPacket req, CommunicationPacket res) {
         double amount = (double) req.getPayload();
-        // No real wallet tracking yet.
+        // No wallet tracking implemented yet.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Deposited " + amount + " (stub)");
     }
@@ -283,7 +263,7 @@ public class ReservationServer implements ReservationServerInterface {
     /** Payload: Double amount */
     private void handleWithdraw(CommunicationPacket req, CommunicationPacket res) {
         double amount = (double) req.getPayload();
-        // No real wallet tracking yet.
+        // No wallet tracking implemented yet.
         res.setErrorCode(ErrorCode.NONE)
                 .setMessage("Withdrew " + amount + " (stub)");
     }

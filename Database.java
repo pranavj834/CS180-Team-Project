@@ -1,15 +1,17 @@
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores UserAccount and Reservation info to be
- * accessed by the server.
+ * accessed by the server. Now supports simple
+ * text-file persistence.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version November 10, 2025
+ * @version November 23, 2025 (persistence added by zhu1220)
  */
-
 public class Database implements DatabaseInterface {
     private ArrayList<UserAccount> accounts;
     private ArrayList<Reservation> reservations;
@@ -19,6 +21,159 @@ public class Database implements DatabaseInterface {
         accounts = new ArrayList<>();
         reservations = new ArrayList<>();
     }
+
+    // =============== PERSISTENCE API =================
+
+    /**
+     * Saves all accounts and reservations to the given text files.
+     *
+     * @param accountFile      path for accounts file
+     * @param reservationFile  path for reservations file
+     * @throws IOException if writing fails
+     */
+    public synchronized void saveToFiles(String accountFile, String reservationFile) throws IOException {
+        saveAccounts(accountFile);
+        saveReservations(reservationFile);
+    }
+
+    /**
+     * Loads all accounts and reservations from the given text files.
+     * Existing in-memory data is cleared first.
+     *
+     * @param accountFile      path for accounts file
+     * @param reservationFile  path for reservations file
+     * @throws IOException if reading fails
+     */
+    public synchronized void loadFromFiles(String accountFile, String reservationFile) throws IOException {
+        accounts.clear();
+        reservations.clear();
+        loadAccounts(accountFile);
+        loadReservations(reservationFile);
+    }
+
+    // ---------- internal: accounts ----------
+
+    private void saveAccounts(String accountFile) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(accountFile))) {
+            out.println(accounts.size());
+            for (UserAccount account : accounts) {
+                // username password fullName email
+                out.printf("%s %s %s %s%n",
+                        account.getUsername(),
+                        account.getPassword(),
+                        account.getFullName(),
+                        account.getEmail());
+            }
+        }
+    }
+
+    private void loadAccounts(String accountFile) throws IOException {
+        File f = new File(accountFile);
+        if (!f.exists()) {
+            return; // nothing to load yet
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            String line = br.readLine();
+            if (line == null || line.isEmpty()) return;
+
+            int count = Integer.parseInt(line.trim());
+            for (int i = 0; i < count; i++) {
+                String data = br.readLine();
+                if (data == null) break;
+                String[] parts = data.split(" ");
+                if (parts.length < 4) continue;
+
+                String username = parts[0];
+                String password = parts[1];
+                String fullName = parts[2];
+                String email = parts[3];
+
+                UserAccount acct = new UserAccount(username, password, fullName, email);
+                accounts.add(acct);
+            }
+        }
+    }
+
+    // ---------- internal: reservations ----------
+
+    private void saveReservations(String reservationFile) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(reservationFile))) {
+            // First line: number of reservations
+            out.println(reservations.size());
+
+            for (Reservation r : reservations) {
+                // fullName username YYYY-MM-DD HH:MM partySize
+                out.printf("%s %s %s %s %d%n",
+                        r.getName(),
+                        r.getUsername(),
+                        r.getDate(),
+                        r.getTime(),
+                        r.getNumPeople());
+
+                // Second line: list of seat numbers, space-separated
+                List<Integer> seats = r.getSeats();
+                if (seats != null && !seats.isEmpty()) {
+                    for (int i = 0; i < seats.size(); i++) {
+                        if (i > 0) {
+                            out.print(" ");
+                        }
+                        out.print(seats.get(i));
+                    }
+                }
+                out.println();
+            }
+        }
+    }
+
+    private void loadReservations(String reservationFile) throws IOException {
+        File f = new File(reservationFile);
+        if (!f.exists()) {
+            return; // nothing to load yet
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            String line = br.readLine();
+            if (line == null || line.isEmpty()) return;
+
+            int count = Integer.parseInt(line.trim());
+            for (int i = 0; i < count; i++) {
+                String header = br.readLine();
+                if (header == null) break;
+
+                String[] parts = header.split(" ");
+                if (parts.length < 5) continue;
+
+                String fullName = parts[0];
+                String username = parts[1];
+                String date = parts[2]; // "YYYY-MM-DD"
+                String time = parts[3]; // "HH:MM"
+                int partySize = Integer.parseInt(parts[4]);
+
+                String seatLine = br.readLine();
+                ArrayList<Integer> seatNumbers = new ArrayList<>();
+                if (seatLine != null && !seatLine.trim().isEmpty()) {
+                    String[] seatParts = seatLine.trim().split(" ");
+                    for (String s : seatParts) {
+                        seatNumbers.add(Integer.parseInt(s));
+                    }
+                }
+
+                Reservation r = new Reservation(fullName, username, date, time, partySize, seatNumbers);
+                reservations.add(r);
+
+                // also attach reservation to matching account if present
+                for (UserAccount acct : accounts) {
+                    if (acct.getUsername().equals(username)) {
+                        acct.addReservation(r);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // =============== EXISTING METHODS =================
 
     // adds account
     public synchronized boolean addAccount(UserAccount account) {
@@ -31,8 +186,9 @@ public class Database implements DatabaseInterface {
 
     // adds reservation
     public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
-        for (Reservation r: reservations) {
-            if (r.getDate().equals(reservation.getDate()) && r.getTime().equals(reservation.getTime())) {
+        for (Reservation r : reservations) {
+            if (r.getDate().equals(reservation.getDate())
+                    && r.getTime().equals(reservation.getTime())) {
                 return false;
             }
         }
@@ -50,7 +206,7 @@ public class Database implements DatabaseInterface {
     // deletes account
     public synchronized boolean deleteAccount(UserAccount account) {
         if (accounts.contains(account)) {
-            for (Reservation r: account.getReservations()) {
+            for (Reservation r : account.getReservations()) {
                 // must remove all associated reservations with the account
                 reservations.remove(r);
             }
@@ -81,20 +237,21 @@ public class Database implements DatabaseInterface {
     public synchronized ArrayList<UserAccount> getAccounts() {
         return accounts;
     }
+
     public synchronized ArrayList<Reservation> getReservations() {
         return reservations;
     }
 
     public String toString() {
-        String str = "";
-        str += "Accounts:\n";
-        for (UserAccount account: accounts) {
-            str += account + "\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Accounts:\n");
+        for (UserAccount account : accounts) {
+            sb.append(account).append("\n");
         }
-        str += "\nReservations:\n";
-        for (Reservation reservation: reservations) {
-            str += reservation + "\n";
+        sb.append("\nReservations:\n");
+        for (Reservation reservation : reservations) {
+            sb.append(reservation).append("\n");
         }
-        return str;
+        return sb.toString();
     }
 }

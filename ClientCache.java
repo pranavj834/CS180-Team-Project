@@ -9,9 +9,6 @@ import java.util.List;
  * wallet balance.</p>
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
- *
- * @author zhu1220, lab sec L23
- * @version November 8, 2025
  */
 public class ClientCache {
     private List<Reservation> myReservations = new ArrayList<>();
