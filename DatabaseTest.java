@@ -179,4 +179,29 @@ public class DatabaseTest {
         assertEquals(0, db.getAccounts().size());
         assertEquals(0, db.getReservations().size());
 
-        db
+        // Save and reload, should still be empty
+        db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
+
+        Database loaded = new Database();
+        loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
+
+        assertEquals(0, loaded.getAccounts().size());
+        assertEquals(0, loaded.getReservations().size());
+    }
+
+    /**
+     * Loading from non-existent files should not throw and should keep DB empty.
+     */
+    @Test
+    public void testLoadFromMissingFiles() throws IOException {
+        // Make sure files do NOT exist
+        deleteIfExists(ACCOUNT_FILE);
+        deleteIfExists(RESERVATION_FILE);
+
+        Database loaded = new Database();
+        loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
+
+        assertEquals(0, loaded.getAccounts().size());
+        assertEquals(0, loaded.getReservations().size());
+    }
+}
