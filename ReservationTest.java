@@ -1,6 +1,7 @@
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -44,6 +45,9 @@ public class ReservationTest {
     @Test
     public void testToStringContainsCoreInfo() {
         ArrayList<Integer> seats = new ArrayList<>();
+        seats.add(5);
+        seats.add(6);
+
         Reservation r = new Reservation(
                 "Bob",
                 "bob",
@@ -60,7 +64,7 @@ public class ReservationTest {
         assertTrue(s.contains("2"));
     }
 
-    // ---------- NEW: input validation tests ----------
+    // ---------- Validation tests ----------
 
     @Test(expected = IllegalArgumentException.class)
     public void testBlankNameNotAllowed() {
@@ -70,7 +74,7 @@ public class ReservationTest {
                 "2025-01-01",
                 "19:00",
                 2,
-                new ArrayList<Integer>()
+                new ArrayList<>(Arrays.asList(1, 2))
         );
     }
 
@@ -82,7 +86,7 @@ public class ReservationTest {
                 "2025-01-01",
                 "19:00",
                 2,
-                new ArrayList<Integer>()
+                new ArrayList<>(Arrays.asList(1, 2))
         );
     }
 
@@ -94,7 +98,7 @@ public class ReservationTest {
                 "   ",            // blank date
                 "19:00",
                 2,
-                new ArrayList<Integer>()
+                new ArrayList<>(Arrays.asList(1, 2))
         );
     }
 
@@ -106,7 +110,31 @@ public class ReservationTest {
                 "2025-01-01",
                 "",               // blank time
                 2,
-                new ArrayList<Integer>()
+                new ArrayList<>(Arrays.asList(1, 2))
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidDateFormat() {
+        new Reservation(
+                "Name",
+                "user",
+                "01-01-2025",     // wrong format
+                "19:00",
+                2,
+                new ArrayList<>(Arrays.asList(1, 2))
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidTimeFormat() {
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "7pm",            // wrong format
+                2,
+                new ArrayList<>(Arrays.asList(1, 2))
         );
     }
 
@@ -118,7 +146,7 @@ public class ReservationTest {
                 "2025-01-01",
                 "19:00",
                 0,                // invalid party size
-                new ArrayList<Integer>()
+                new ArrayList<>(Arrays.asList(1, 2))
         );
     }
 
@@ -126,6 +154,7 @@ public class ReservationTest {
     public void testSeatNumbersMustBePositive() {
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(-1);             // invalid seat
+        seats.add(2);
 
         new Reservation(
                 "Name",
@@ -134,6 +163,30 @@ public class ReservationTest {
                 "19:00",
                 2,
                 seats
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSeatCountMustMatchPartySize() {
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "19:00",
+                3,                                // party size 3
+                new ArrayList<>(Arrays.asList(1, 2)) // only 2 seats
+        );
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptySeatListNotAllowed() {
+        new Reservation(
+                "Name",
+                "user",
+                "2025-01-01",
+                "19:00",
+                2,
+                new ArrayList<Integer>()          // empty list
         );
     }
 }

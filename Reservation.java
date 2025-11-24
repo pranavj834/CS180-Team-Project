@@ -3,14 +3,21 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Represents a reservation. Validates basic input:
- * - name, username, date, time not blank
- * - partySize > 0
- * - seat numbers > 0 (if present)
+ * Represents a reservation with basic input validation:
+ * - name, username, date, time cannot be blank
+ * - date must be in YYYY-MM-DD format
+ * - time must be in HH:MM format
+ * - partySize must be > 0
+ * - seatNumbers must be non-empty, all > 0, and size must equal partySize
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
  */
 public class Reservation implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
+	private static final String TIME_REGEX = "^\\d{2}:\\d{2}$";
 
 	private String name;
 	private String username;
@@ -31,7 +38,7 @@ public class Reservation implements Serializable {
 		validateDate(date);
 		validateTime(time);
 		validatePartySize(partySize);
-		validateSeats(seatNumbers);
+		validateSeats(seatNumbers, partySize);
 
 		this.name = name;
 		this.username = username;
@@ -39,9 +46,7 @@ public class Reservation implements Serializable {
 		this.time = time;
 		this.partySize = partySize;
 		// defensive copy
-		this.seatNumbers = (seatNumbers == null)
-				? new ArrayList<>()
-				: new ArrayList<>(seatNumbers);
+		this.seatNumbers = new ArrayList<>(seatNumbers);
 	}
 
 	// ========== VALIDATION HELPERS ==========
@@ -62,14 +67,18 @@ public class Reservation implements Serializable {
 		if (date == null || date.trim().isEmpty()) {
 			throw new IllegalArgumentException("Date cannot be blank");
 		}
-		// You could add a stricter regex here if you want (e.g., YYYY-MM-DD)
+		if (!date.matches(DATE_REGEX)) {
+			throw new IllegalArgumentException("Date must be in format YYYY-MM-DD");
+		}
 	}
 
 	private static void validateTime(String time) {
 		if (time == null || time.trim().isEmpty()) {
 			throw new IllegalArgumentException("Time cannot be blank");
 		}
-		// Likewise, could enforce HH:MM with a regex if needed
+		if (!time.matches(TIME_REGEX)) {
+			throw new IllegalArgumentException("Time must be in format HH:MM");
+		}
 	}
 
 	private static void validatePartySize(int partySize) {
@@ -78,9 +87,12 @@ public class Reservation implements Serializable {
 		}
 	}
 
-	private static void validateSeats(ArrayList<Integer> seats) {
-		if (seats == null) {
-			return; // we allow null / empty → no seats booked yet
+	private static void validateSeats(ArrayList<Integer> seats, int partySize) {
+		if (seats == null || seats.isEmpty()) {
+			throw new IllegalArgumentException("Seat list cannot be empty");
+		}
+		if (seats.size() != partySize) {
+			throw new IllegalArgumentException("Number of seats must equal party size");
 		}
 		for (Integer s : seats) {
 			if (s == null || s <= 0) {
@@ -107,7 +119,7 @@ public class Reservation implements Serializable {
 		return time;
 	}
 
-	// Needed for your test
+	// Needed for tests (and maybe GUI)
 	public void setTime(String t) {
 		validateTime(t);
 		this.time = t;
@@ -117,7 +129,7 @@ public class Reservation implements Serializable {
 		return partySize;
 	}
 
-	// For your unit test
+	// For your existing unit tests
 	public int getNumPeople() {
 		return partySize;
 	}
@@ -126,7 +138,7 @@ public class Reservation implements Serializable {
 		return new ArrayList<>(seatNumbers);
 	}
 
-	// NEW: alias method
+	// Alias method (for new code/tests)
 	public ArrayList<Integer> getSeats() {
 		return new ArrayList<>(seatNumbers);
 	}

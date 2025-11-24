@@ -11,8 +11,7 @@ import java.util.ArrayList;
 
 public class UserAccount implements UserAccountInterface {
 
-	// Simple email regex: some non-space/@ chars, "@", some non-space/@ chars, ".", some non-space/@ chars
-	// Example: "alice@example.com". This is not perfect but is good enough for this project.
+	// Simple email regex: non-space/@, '@', non-space/@, '.', non-space/@
 	private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
 	//instance variables (usual attributes of an account)
@@ -78,9 +77,9 @@ public class UserAccount implements UserAccountInterface {
 	public synchronized String getPassword() {
 		return password;
 	}
-
 	public synchronized ArrayList<Reservation> getReservations() {
-		return new ArrayList<>(reservations); // defensive copy
+		// defensive copy to avoid external modification of internal state
+		return new ArrayList<>(reservations);
 	}
 
 	//setter methods; sets the respective instance variable to the respective inputs given

@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author zhu1220, chan531, lab sec L23
+ * @author zhu1220,
  * @version November 8, 2025 (validation tests added)
  */
 
@@ -41,8 +41,8 @@ public class UserAccountTest {
         assertEquals("Username should be updated", "newuser", acc.getUsername());
         assertEquals("Full name should be updated", "NewName", acc.getFullName());
         assertEquals("Email should be updated", "new@example.com", acc.getEmail());
-        assertEquals("Updated credentials should match", new UserAccount("newuser",
-                "123", "NewName", "new@example.com"), acc);
+        assertEquals("Updated credentials should match",
+                new UserAccount("newuser", "123", "NewName", "new@example.com"), acc);
     }
 
     @Test(timeout = 1000)
@@ -68,7 +68,7 @@ public class UserAccountTest {
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(1);
         Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10",
-                "18:30", 2, seats);
+                "18:30", 1, seats);  // partySize matches seats.size()
 
         assertTrue("addReservation should return true when added",
                 acc.addReservation(res));
@@ -93,7 +93,7 @@ public class UserAccountTest {
                 "UserAccount for TestUser, user1 - user1@example.com", s);
     }
 
-    // ---------- NEW: validation tests ----------
+    // ---------- Validation tests ----------
 
     @Test(expected = IllegalArgumentException.class)
     public void testBlankUsernameNotAllowed() {
