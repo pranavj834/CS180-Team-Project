@@ -16,7 +16,7 @@ import java.util.Scanner;
  * @version November 24, 2025
  */
 
-public class Client {
+public class Client implements ClientInterface {
 
     private static final String HOST = "localhost";
     private static final int PORT = 500;

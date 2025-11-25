@@ -1,11 +1,16 @@
 import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
- * Tests for the Packet class constructors and getters
+ * Interface for the Packet class.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author jastip
+ * @author jastip, lab sec L23
+ * @version November 24, 2025
  */
+
 public class PacketTest {
 
     @Test
@@ -16,7 +21,7 @@ public class PacketTest {
         Object[] obj = {"hello", "hi", "bye"};
         Packet p2 = new Packet(PacketType.ADD_ACCOUNT, obj);
         assertEquals("Packet type should match constructor value", PacketType.ADD_ACCOUNT, p2.getType());
-        assertArrayEquals("Objects array should match the one provided", arr, p2.getObj());
+        assertArrayEquals("Objects array should match the one provided", obj, p2.getObj());
     }
 
     @Test

@@ -21,7 +21,7 @@ public class Server implements Runnable, ServerInterface {
     private static Database db;
 
     public Server() {
-        db = new Database();
+        db = new Database("accounts.txt", "reservations.txt");
     }
 
     private void handleClient(Socket socket, Server server) {
@@ -79,7 +79,7 @@ public class Server implements Runnable, ServerInterface {
                             availableSeats.add(i);
                         }
                     }
-                    String msg = "Available Seats: " + availableSeats.toString();
+                    String msg = "Available Seats: " + availableSeats;
                     out.writeObject(new Packet(PacketType.GET_SEAT_STATUSES_AT_TIME, new Object[]{msg}));
 
                 } else if (packet.getType() == PacketType.GET_ACCT_RESERVATIONS) {

@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        Database db = new Database();
+        Database db = new Database("accounts.txt", "reservations.txt");
         System.out.println("Database Testing - Phase 1");
 
         while (true) {

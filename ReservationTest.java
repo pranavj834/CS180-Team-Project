@@ -1,14 +1,56 @@
 import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import static org.junit.Assert.*;
+
+/**
+ * Test class for the Reservation methods.
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author zhu1220, chan531, lab sec L23
+ * @version November 24, 2025
+ */
 
 public class ReservationTest {
 
     @Test
-    public void testEqualsUsesAllFields() {
+    public void testGettersAndSetters() {
+        ArrayList<Integer> seats = new ArrayList<>();
+        seats.add(1);
+        seats.add(2);
+        seats.add(3);
+        seats.add(4);
+        seats.add(5);
+        Reservation reservation = new Reservation("JohnDoe", "johndoe", "2025-10-31",
+                "18:00", 5, seats);
+
+        assertEquals("Name should match the name passed in", "JohnDoe", reservation.getName());
+        assertEquals("Username should match the username passed in", "johndoe", reservation.getUsername());
+        assertEquals("Date should match the date passed in", "2025-10-31", reservation.getDate());
+        assertEquals("Time should match the time passed in", "18:00", reservation.getTime());
+        assertEquals("Party size should match the party size passed in", 5, reservation.getPartySize());
+        assertEquals("Seats should match the ArrayList passed in", seats, reservation.getSeats());
+
+        seats.remove(0);
+        seats.remove(0);
+        reservation.setName("JaneDoe");
+        reservation.setUsername("janedoe");
+        reservation.setDate("2025-01-01");
+        reservation.setTime("00:00");
+        reservation.setPartySize(3);
+        reservation.setSeats(seats);
+
+        assertEquals("Name should match the name passed in", "JaneDoe", reservation.getName());
+        assertEquals("Username should match the username passed in", "janedoe", reservation.getUsername());
+        assertEquals("Date should match the date passed in", "2025-01-01", reservation.getDate());
+        assertEquals("Time should match the time passed in", "00:00", reservation.getTime());
+        assertEquals("Party size should match the party size passed in", 3, reservation.getPartySize());
+        assertEquals("Seats should match the ArrayList passed in", seats, reservation.getSeats());
+    }
+
+    @Test
+    public void testEquals() {
         ArrayList<Integer> seats1 = new ArrayList<>();
         seats1.add(1);
         seats1.add(2);
@@ -43,7 +85,7 @@ public class ReservationTest {
     }
 
     @Test
-    public void testToStringContainsCoreInfo() {
+    public void testToString() {
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(5);
         seats.add(6);

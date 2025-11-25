@@ -1,13 +1,13 @@
 /**
- * Interface for the core server-side logic of the restaurant reservation system.
+ * An interface for the Server class.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author zhu1220
- * @version November 10, 2025
+ * @author chan531
+ * @version November 24, 2025
  */
 
 public interface ServerInterface {
-
-    void startServer();
+    void run();
+    static void main(String[] args) {};
 }

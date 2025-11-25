@@ -6,17 +6,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
 /**
- * Tests for the Database class, focusing on
- * saving to and loading from text files.
+ * Test class for the Database methods.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author zhu1220
+ * @author zhu1220, jastip, chan531, lab sec L23
+ * @version November 23, 2025
  */
+
 public class DatabaseTest {
 
     private static final String ACCOUNT_FILE = "test_accounts.txt";
@@ -26,9 +28,9 @@ public class DatabaseTest {
 
     @Before
     public void setUp() {
-        db = new Database();
         deleteIfExists(ACCOUNT_FILE);
         deleteIfExists(RESERVATION_FILE);
+        db = new Database(ACCOUNT_FILE, RESERVATION_FILE);
     }
 
     @After
@@ -38,9 +40,13 @@ public class DatabaseTest {
     }
 
     private void deleteIfExists(String path) {
-        File f = new File(path);
-        if (f.exists()) {
-            f.delete();
+        try {
+            File f = new File(path);
+            if (f.delete()) {
+                f.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -52,7 +58,7 @@ public class DatabaseTest {
     public void testSaveAndLoadEmptyDatabase() throws IOException {
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         assertEquals(0, loaded.getAccounts().size());
@@ -70,7 +76,7 @@ public class DatabaseTest {
 
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         assertEquals(1, loaded.getAccounts().size());
@@ -101,7 +107,7 @@ public class DatabaseTest {
 
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         assertEquals(1, loaded.getAccounts().size());
@@ -138,7 +144,7 @@ public class DatabaseTest {
 
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         UserAccount loadedAcct = loaded.getAccounts().get(0);
@@ -171,7 +177,7 @@ public class DatabaseTest {
 
         db.saveToFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         assertEquals(0, loaded.getAccounts().size());
@@ -214,7 +220,7 @@ public class DatabaseTest {
         deleteIfExists(ACCOUNT_FILE);
         deleteIfExists(RESERVATION_FILE);
 
-        Database loaded = new Database();
+        Database loaded = new Database(ACCOUNT_FILE, RESERVATION_FILE);
         loaded.loadFromFiles(ACCOUNT_FILE, RESERVATION_FILE);
 
         assertEquals(0, loaded.getAccounts().size());
@@ -223,7 +229,7 @@ public class DatabaseTest {
 
     @Test
     public void testSeatStatusMethods() {
-        Database db = new Database();
+        Database db = new Database(ACCOUNT_FILE, RESERVATION_FILE);
 
         //tests getSeatStatuses() so that returns modifiable map
         HashMap<String, boolean[]> map = db.getSeatStatuses();
@@ -233,6 +239,7 @@ public class DatabaseTest {
         //tests getSeatStatusesAtTime() creates a new entry when needed
         assertFalse(map.containsKey("10:00"));
         boolean[] created = db.getSeatStatusesAtTime("10:00");
+        assertTrue(map.containsKey("10:00"));
 
         assertNotNull(created);
         assertEquals(30, created.length);

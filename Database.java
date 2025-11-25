@@ -5,26 +5,30 @@ import java.util.List;
 
 /**
  * Stores UserAccount and Reservation info to be
- * accessed by the server. Now supports simple
- * text-file persistence.
+ * accessed by the server. Saves information to
+ * text files and retains information in between runs.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, zhu1220, lab sec L23
- * @version November 23, 2025
+ * @version November 24, 2025
  */
 
 public class Database implements DatabaseInterface {
     private final ArrayList<UserAccount> accounts;
     private final ArrayList<Reservation> reservations;
     private final HashMap<String, boolean[]> seatStatuses;
+    private String accountFile;
+    private String reservationFile;
 
     // initializes arraylists
-    public Database() {
+    public Database(String accountFile, String reservationFile) {
         accounts = new ArrayList<>();
         reservations = new ArrayList<>();
         seatStatuses = new HashMap<>();
-        loadFromFiles("accounts.txt", "reservations.txt");
+        this.accountFile = accountFile;
+        this.reservationFile = reservationFile;
+        loadFromFiles(accountFile, reservationFile);
     }
 
     // =============== PERSISTENCE API =================
@@ -207,7 +211,7 @@ public class Database implements DatabaseInterface {
             return false;
         }
         accounts.add(account);
-        saveToFiles("accounts.txt", "reservations.txt");
+        saveToFiles(accountFile, reservationFile);
         return true;
     }
 
@@ -239,8 +243,7 @@ public class Database implements DatabaseInterface {
             restaurantSeats[seatNumber] = true; // mark seats as reserved
         }
         seatStatuses.put(timeslot, restaurantSeats);
-        saveToFiles("accounts.txt", "reservations.txt");
-
+        saveToFiles(accountFile, reservationFile);
         return true;
     }
 
@@ -253,7 +256,7 @@ public class Database implements DatabaseInterface {
                 reservations.remove(r);
             }
             accounts.remove(account);
-            saveToFiles("accounts.txt", "reservations.txt");
+            saveToFiles(accountFile, reservationFile);
             return true;
         }
         return false;
@@ -280,7 +283,7 @@ public class Database implements DatabaseInterface {
                 restaurantSeats[seatNumber] = false; // free up seats
             }
             seatStatuses.put(timeslot, restaurantSeats);
-            saveToFiles("accounts.txt", "reservations.txt");
+            saveToFiles(accountFile, reservationFile);
             return true;
         }
         return false;

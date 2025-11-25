@@ -3,13 +3,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Interface for the Database class storing user accounts and reservations.
+ * Interface for the Database class.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author chan531, lab sec L23
+ * @version November 24, 2025
  */
-public interface DatabaseInterface {
 
-    // Core CRUD
+public interface DatabaseInterface {
 
     boolean addAccount(UserAccount account);
 
@@ -30,8 +32,6 @@ public interface DatabaseInterface {
     boolean[] getSeatStatusesAtTime(String timestamp);
 
     String toString();
-
-    // Phase 2 persistence API
 
     void saveToFiles(String accountFile, String reservationFile) throws IOException;
 

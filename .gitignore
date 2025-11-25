@@ -1,2 +1,6 @@
 .idea/
 out/
+accounts.txt
+reservations.txt
+test_accounts.txt
+test_reservations.txt

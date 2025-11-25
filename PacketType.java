@@ -1,3 +1,13 @@
+/**
+ * Contains enums that help identify the purpose
+ * of a Packet sent between the client and server.
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2025</p>
+ *
+ * @author chan531, lab sec L23
+ * @version November 24, 2025
+ */
+
 enum PacketType {
     LOGIN,
     ADD_ACCOUNT, ADD_RESERVATION,

@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author zhu1220,
+ * @author zhu1220, chan531, lab sec l23
  * @version November 8, 2025 (validation tests added)
  */
 
