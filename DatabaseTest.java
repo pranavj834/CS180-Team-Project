@@ -113,7 +113,7 @@ public class DatabaseTest {
         assertEquals("user2", loadedRes.getUsername());
         assertEquals("2025-11-23", loadedRes.getDate());
         assertEquals("19:00", loadedRes.getTime());
-        assertEquals(3, loadedRes.getNumPeople());
+        assertEquals(3, loadedRes.getPartySize());
         assertEquals(Arrays.asList(5, 6, 7), loadedRes.getSeats());
 
         assertEquals(1, loadedAcct.getReservations().size());

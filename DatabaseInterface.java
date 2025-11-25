@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Interface for the Database class storing user accounts and reservations.
@@ -21,6 +22,14 @@ public interface DatabaseInterface {
     ArrayList<UserAccount> getAccounts();
 
     ArrayList<Reservation> getReservations();
+
+    ArrayList<Reservation> getAccountReservations(UserAccount account);
+
+    HashMap<String, boolean[]> getSeatStatuses();
+
+    boolean[] getSeatStatusesAtTime(String timestamp);
+
+    String toString();
 
     // Phase 2 persistence API
 
