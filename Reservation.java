@@ -14,7 +14,7 @@ import java.util.Objects;
  *  * @author zhu1220, jastip
  *  * @version November 20, 2025
  */
-public class Reservation implements Serializable {
+public class Reservation implements Serializable, ReservationInterface {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,46 +26,45 @@ public class Reservation implements Serializable {
 	private String date;   // "YYYY-MM-DD"
 	private String time;   // "HH:MM"
 	private int partySize;
-	private ArrayList<Integer> seatNumbers;
+	private ArrayList<Integer> seats;
 
 	public Reservation(String name,
 					   String username,
 					   String date,
 					   String time,
 					   int partySize,
-					   ArrayList<Integer> seatNumbers) {
+					   ArrayList<Integer> seats) {
 
 		validateName(name);
 		validateUsername(username);
 		validateDate(date);
 		validateTime(time);
 		validatePartySize(partySize);
-		validateSeats(seatNumbers, partySize);
+		validateSeats(seats, partySize);
 
 		this.name = name;
 		this.username = username;
 		this.date = date;
 		this.time = time;
 		this.partySize = partySize;
-		// defensive copy
-		this.seatNumbers = new ArrayList<>(seatNumbers);
+		this.seats = seats;
 	}
 
 	// ========== VALIDATION HELPERS ==========
 
-	private static void validateName(String name) {
+	private void validateName(String name) {
 		if (name == null || name.trim().isEmpty()) {
 			throw new IllegalArgumentException("Reservation name cannot be blank");
 		}
 	}
 
-	private static void validateUsername(String username) {
+	private void validateUsername(String username) {
 		if (username == null || username.trim().isEmpty()) {
 			throw new IllegalArgumentException("Reservation username cannot be blank");
 		}
 	}
 
-	private static void validateDate(String date) {
+	private void validateDate(String date) {
 		if (date == null || date.trim().isEmpty()) {
 			throw new IllegalArgumentException("Date cannot be blank");
 		}
@@ -74,7 +73,7 @@ public class Reservation implements Serializable {
 		}
 	}
 
-	private static void validateTime(String time) {
+	private void validateTime(String time) {
 		if (time == null || time.trim().isEmpty()) {
 			throw new IllegalArgumentException("Time cannot be blank");
 		}
@@ -83,13 +82,13 @@ public class Reservation implements Serializable {
 		}
 	}
 
-	private static void validatePartySize(int partySize) {
+	private void validatePartySize(int partySize) {
 		if (partySize <= 0) {
 			throw new IllegalArgumentException("Party size must be greater than 0");
 		}
 	}
 
-	private static void validateSeats(ArrayList<Integer> seats, int partySize) {
+	private void validateSeats(ArrayList<Integer> seats, int partySize) {
 		if (seats == null || seats.isEmpty()) {
 			throw new IllegalArgumentException("Seat list cannot be empty");
 		}
@@ -121,40 +120,56 @@ public class Reservation implements Serializable {
 		return time;
 	}
 
-	// Needed for tests (and maybe GUI)
-	public void setTime(String t) {
-		validateTime(t);
-		this.time = t;
-	}
-
 	public int getPartySize() {
 		return partySize;
 	}
 
-	// For your existing unit tests
-	public int getNumPeople() {
-		return partySize;
-	}
-
-	public ArrayList<Integer> getTheSeatNumbers() {
-		return new ArrayList<>(seatNumbers);
-	}
-
-	// Alias method (for new code/tests)
 	public ArrayList<Integer> getSeats() {
-		return new ArrayList<>(seatNumbers);
+		return new ArrayList<>(seats);
 	}
+
+	public void setName(String name) {
+		validateName(name);
+		this.name = name;
+	}
+
+	public void setUsername(String username) {
+		validateUsername(username);
+		this.username = username;
+	}
+
+	public void setDate(String date) {
+		validateTime(date);
+		this.date = date;
+	}
+
+	public void setTime(String time) {
+		validateTime(time);
+		this.time = time;
+	}
+
+	public void setPartySize(int partySize) {
+		validatePartySize(partySize);
+	}
+
+	@Override
+	public void setSeats(ArrayList<Integer> seats) {
+		validateSeats(seats, partySize);
+		this.seats = seats;
+	}
+
+	// ========== GENERAL ==========
 
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Reservation)) return false;
 		Reservation r = (Reservation) o;
-		return Objects.equals(name, r.name)
-				&& Objects.equals(username, r.username)
-				&& Objects.equals(date, r.date)
-				&& Objects.equals(time, r.time)
+		return Objects.equals(name, r.getName())
+				&& Objects.equals(username, r.getUsername())
+				&& Objects.equals(date, r.getDate())
+				&& Objects.equals(time, r.getTime())
 				&& partySize == r.partySize
-				&& Objects.equals(seatNumbers, r.seatNumbers);
+				&& Objects.equals(seats, r.getSeats());
 	}
 
 	@Override

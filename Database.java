@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,14 +13,17 @@ import java.util.List;
  * @author chan531, lab sec L23
  * @version November 23, 2025 (persistence added by zhu1220, thread-safety tightened)
  */
+
 public class Database implements DatabaseInterface {
     private final ArrayList<UserAccount> accounts;
     private final ArrayList<Reservation> reservations;
+    private final HashMap<String, boolean[]> seatStatuses;
 
     // initializes arraylists
     public Database() {
         accounts = new ArrayList<>();
         reservations = new ArrayList<>();
+        seatStatuses = new HashMap<>();
     }
 
     // =============== PERSISTENCE API =================
@@ -111,7 +115,7 @@ public class Database implements DatabaseInterface {
                         r.getUsername(),
                         r.getDate(),
                         r.getTime(),
-                        r.getNumPeople());
+                        r.getPartySize());
 
                 // Second line: list of seat numbers, space-separated
                 List<Integer> seats = r.getSeats();
@@ -204,6 +208,18 @@ public class Database implements DatabaseInterface {
 
         accounts.get(accounts.indexOf(account)).addReservation(reservation);
         reservations.add(reservation);
+
+        String timeslot = reservation.getDate() + " " + reservation.getTime();
+        boolean[] restaurantSeats = seatStatuses.get(timeslot); // get the availabilities at the time
+        if (restaurantSeats == null) {
+            restaurantSeats = new boolean[30]; // if doesn't exist yet, everything at the timeslot is free
+        }
+        ArrayList<Integer> seats = reservation.getSeats();
+        for (Integer seatNumber: seats) {
+            restaurantSeats[seatNumber] = true; // mark seats as reserved
+        }
+        seatStatuses.put(timeslot, restaurantSeats);
+
         return true;
     }
 
@@ -234,6 +250,15 @@ public class Database implements DatabaseInterface {
         boolean removed = accounts.get(index).removeReservation(reservation);
         if (removed) {
             reservations.remove(reservation); // only remove if the given account created the reservation
+
+            String timeslot = reservation.getDate() + " " + reservation.getTime();
+            boolean[] restaurantSeats = seatStatuses.get(timeslot); // get the availabilities at the time
+            ArrayList<Integer> seats = reservation.getSeats();
+            for (Integer seatNumber: seats) {
+                restaurantSeats[seatNumber] = false; // free up seats
+            }
+            seatStatuses.put(timeslot, restaurantSeats);
+
             return true;
         }
         return false;
@@ -248,6 +273,30 @@ public class Database implements DatabaseInterface {
     @Override
     public synchronized ArrayList<Reservation> getReservations() {
         return new ArrayList<>(reservations);
+    }
+
+    @Override
+    public synchronized ArrayList<Reservation> getAccountReservations(UserAccount account) {
+        ArrayList<Reservation> accountReservations = new ArrayList<>();
+        for (Reservation res: reservations) {
+            if (res.getUsername().equals(account.getUsername())) {
+                accountReservations.add(res);
+            }
+        }
+        return accountReservations;
+    }
+
+    @Override
+    public HashMap<String, boolean[]> getSeatStatuses() {
+        return seatStatuses;
+    }
+
+    @Override
+    public boolean[] getSeatStatusesAtTime(String timestamp) {
+        if (seatStatuses.get(timestamp) == null) {
+            seatStatuses.put(timestamp, new boolean[30]);
+        }
+        return seatStatuses.get(timestamp);
     }
 
     @Override

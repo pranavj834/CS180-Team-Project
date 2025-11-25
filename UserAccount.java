@@ -1,3 +1,5 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +11,7 @@ import java.util.ArrayList;
  * @version November 8, 2025 (input validation added by zhu1220)
  */
 
-public class UserAccount implements UserAccountInterface {
+public class UserAccount implements Serializable, UserAccountInterface {
 
 	// Simple email regex: non-space/@, '@', non-space/@, '.', non-space/@
 	private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
@@ -126,7 +128,6 @@ public class UserAccount implements UserAccountInterface {
 		return username.equals(enteredUserName) && password.equals(enteredPassword);
 	}
 
-	//prints the account details in case necessary
 	public synchronized String toString() {
 		return String.format("UserAccount for %s, %s - %s", fullName, username, email);
 	}

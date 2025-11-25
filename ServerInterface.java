@@ -6,7 +6,8 @@
  * @author zhu1220
  * @version November 10, 2025
  */
-public interface ReservationServerInterface {
 
-    CommunicationPacket handlePacket(CommunicationPacket req);
+public interface ServerInterface {
+
+    void startServer();
 }

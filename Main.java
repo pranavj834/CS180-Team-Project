@@ -5,7 +5,8 @@ import java.util.Scanner;
 /**
  * Runs the entire program (as of phase 1, is only terminal based).
  * NOTE: There is no MainInterface because the main method is static
- *       and the main method is the only method in this class.
+ *       and the main method is the only method in this class. As of
+ *       phase 2, this class is non-functional.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
