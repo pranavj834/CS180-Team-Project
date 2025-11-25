@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * Provides server-side functionality through the
- * command-line. Retrieves informationends information to the client.
+ * command-line. Retrieves information and sends information to the client.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
@@ -111,8 +111,7 @@ public class Server implements Runnable, ServerInterface {
         }
     }
 
-    @Override
-    public void startServer() {
+    private void startServer() {
         Thread t = new Thread(this);
         t.start();
     }

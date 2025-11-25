@@ -38,6 +38,7 @@ public class Client {
                         System.out.println("\n--- Menu (Logged Out) ---");
                         System.out.println("0 - Login");
                         System.out.println("1 - Add/Register UserAccount");
+                        System.out.println("7 - Print Full Database Details (Server Debug)");
                         System.out.println("8 - Exit");
                     } else {
                         System.out.println("\n--- Menu (Logged In as " + currentAccount.getUsername() + ") ---");
@@ -58,7 +59,7 @@ public class Client {
                     // --- LOGIC FOR LOGGED OUT USERS ---
                     if (!loggedIn) {
                         if (choice == 0) {
-                            System.out.println("Enter username: ");
+                            System.out.println("Enter username (e.g., johndoe): ");
                             String username = sc.nextLine().trim();
                             System.out.println("Enter password: ");
                             String password = sc.nextLine().trim();
@@ -78,11 +79,11 @@ public class Client {
                             }
 
                         } else if (choice == 1) { // Add UserAccount (REGISTER)
-                            System.out.println("Enter username: ");
+                            System.out.println("Enter username: (e.g., johndoe)");
                             String username = sc.nextLine().trim();
                             System.out.println("Enter password: ");
                             String password = sc.nextLine().trim();
-                            System.out.println("Enter full name: ");
+                            System.out.println("Enter full name: (e.g., JohnDoe)");
                             String fullName = sc.nextLine().trim();
                             System.out.println("Enter email: ");
                             String email = sc.nextLine().trim();
@@ -97,6 +98,19 @@ public class Client {
                             } else {
                                 System.out.println("Failed to add account (username might be taken).");
                             }
+                        } else if (choice == 7) { // Print Database Details (TO_STRING)
+                            Packet request = new Packet(PacketType.TO_STRING, new Object[]{});
+                            outputStream.writeObject(request);
+
+                            Packet response = (Packet) inputStream.readObject();
+                            if (response.getObj() != null) {
+                                System.out.println("\n--- Full Database Snapshot ---");
+                                System.out.println(response.getObj()[0]);
+                                System.out.println("------------------------------");
+                            } else {
+                                System.out.println("Failed to retrieve database details.");
+                            }
+
                         } else if (choice == 8) {
                             break; // Exit
                         } else {
@@ -107,7 +121,7 @@ public class Client {
                     } else {
                         if (choice == 2) { // Add Reservation
                             System.out.println("Enter reservation details:");
-                            System.out.println("Name: ");
+                            System.out.println("Name: (e.g., JohnDoe)");
                             String name = sc.nextLine().trim();
 
                             String username = currentAccount.getUsername();
@@ -151,8 +165,6 @@ public class Client {
 
                         } else if (choice == 4) { // Delete Reservation
                             System.out.println("Enter reservation details to delete:");
-                            System.out.println("Reservation Name: ");
-                            String name = sc.nextLine().trim();
                             System.out.println("Date (YYYY-MM-DD): ");
                             String date = sc.nextLine().trim();
                             System.out.println("Time (HH:MM): ");
@@ -167,7 +179,7 @@ public class Client {
                             }
 
                             // Note: We need a dummy Reservation object that matches the one to delete.
-                            Reservation reservationToDelete = new Reservation(name, currentAccount.getUsername(), date, time, partySize, seats);
+                            Reservation reservationToDelete = new Reservation(currentAccount.getFullName(), currentAccount.getUsername(), date, time, partySize, seats);
 
                             Packet request = new Packet(PacketType.DELETE_RESERVATION, new Object[]{currentAccount, reservationToDelete});
                             outputStream.writeObject(request);
@@ -188,7 +200,7 @@ public class Client {
 
                             Packet response = (Packet) inputStream.readObject();
                             if (response.getObj() != null) {
-                                System.out.println("Server Response: " + response.getObj()[0]);
+                                System.out.println(response.getObj()[0]);
                             } else {
                                 System.out.println("Failed to retrieve seat statuses.");
                             }

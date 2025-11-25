@@ -10,8 +10,8 @@ import java.util.List;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author chan531, lab sec L23
- * @version November 23, 2025 (persistence added by zhu1220, thread-safety tightened)
+ * @author chan531, zhu1220, lab sec L23
+ * @version November 23, 2025
  */
 
 public class Database implements DatabaseInterface {
@@ -24,6 +24,7 @@ public class Database implements DatabaseInterface {
         accounts = new ArrayList<>();
         reservations = new ArrayList<>();
         seatStatuses = new HashMap<>();
+        loadFromFiles("accounts.txt", "reservations.txt");
     }
 
     // =============== PERSISTENCE API =================
@@ -36,9 +37,13 @@ public class Database implements DatabaseInterface {
      * @throws IOException if writing fails
      */
     @Override
-    public synchronized void saveToFiles(String accountFile, String reservationFile) throws IOException {
-        saveAccounts(accountFile);
-        saveReservations(reservationFile);
+    public synchronized void saveToFiles(String accountFile, String reservationFile) {
+        try {
+            saveAccounts(accountFile);
+            saveReservations(reservationFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -50,11 +55,15 @@ public class Database implements DatabaseInterface {
      * @throws IOException if reading fails
      */
     @Override
-    public synchronized void loadFromFiles(String accountFile, String reservationFile) throws IOException {
+    public synchronized void loadFromFiles(String accountFile, String reservationFile) {
         accounts.clear();
         reservations.clear();
-        loadAccounts(accountFile);
-        loadReservations(reservationFile);
+        try {
+            loadAccounts(accountFile);
+            loadReservations(reservationFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ---------- internal: accounts ----------
@@ -165,6 +174,16 @@ public class Database implements DatabaseInterface {
                     }
                 }
 
+                String timeslot = date + " " + time;
+                boolean[] restaurantSeats = seatStatuses.get(timeslot); // get the availabilities at the time
+                if (restaurantSeats == null) {
+                    restaurantSeats = new boolean[30]; // if doesn't exist yet, everything at the timeslot is free
+                }
+                for (Integer seatNumber: seatNumbers) {
+                    restaurantSeats[seatNumber] = true; // mark seats as reserved
+                }
+                seatStatuses.put(timeslot, restaurantSeats);
+
                 Reservation r = new Reservation(fullName, username, date, time, partySize, seatNumbers);
                 reservations.add(r);
 
@@ -188,6 +207,7 @@ public class Database implements DatabaseInterface {
             return false;
         }
         accounts.add(account);
+        saveToFiles("accounts.txt", "reservations.txt");
         return true;
     }
 
@@ -219,6 +239,7 @@ public class Database implements DatabaseInterface {
             restaurantSeats[seatNumber] = true; // mark seats as reserved
         }
         seatStatuses.put(timeslot, restaurantSeats);
+        saveToFiles("accounts.txt", "reservations.txt");
 
         return true;
     }
@@ -232,6 +253,7 @@ public class Database implements DatabaseInterface {
                 reservations.remove(r);
             }
             accounts.remove(account);
+            saveToFiles("accounts.txt", "reservations.txt");
             return true;
         }
         return false;
@@ -258,7 +280,7 @@ public class Database implements DatabaseInterface {
                 restaurantSeats[seatNumber] = false; // free up seats
             }
             seatStatuses.put(timeslot, restaurantSeats);
-
+            saveToFiles("accounts.txt", "reservations.txt");
             return true;
         }
         return false;
@@ -287,12 +309,12 @@ public class Database implements DatabaseInterface {
     }
 
     @Override
-    public HashMap<String, boolean[]> getSeatStatuses() {
+    public synchronized HashMap<String, boolean[]> getSeatStatuses() {
         return seatStatuses;
     }
 
     @Override
-    public boolean[] getSeatStatusesAtTime(String timestamp) {
+    public synchronized boolean[] getSeatStatusesAtTime(String timestamp) {
         if (seatStatuses.get(timestamp) == null) {
             seatStatuses.put(timestamp, new boolean[30]);
         }
