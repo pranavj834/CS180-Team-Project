@@ -18,35 +18,25 @@ import java.util.Objects;
 public class Reservation implements Serializable, ReservationInterface {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
-	private static final String TIME_REGEX = "^\\d{2}:\\d{2}$";
+	private static final String TIMESTAMP_REGEX = "^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}$";
 
 	private String name;
 	private String username;
-	private String date;   // "YYYY-MM-DD"
-	private String time;   // "HH:MM"
+	private String timestamp;   // "YYYY-MM-DD"
 	private int partySize;
 	private ArrayList<Integer> seats;
 
-	public Reservation(String name,
-					   String username,
-					   String date,
-					   String time,
-					   int partySize,
-					   ArrayList<Integer> seats) {
-
+	public Reservation(String name, String username, String timestamp,
+					   int partySize, ArrayList<Integer> seats) {
 		validateName(name);
 		validateUsername(username);
-		validateDate(date);
-		validateTime(time);
+		validateTimestamp(timestamp);
 		validatePartySize(partySize);
 		validateSeats(seats, partySize);
 
 		this.name = name;
 		this.username = username;
-		this.date = date;
-		this.time = time;
+		this.timestamp = timestamp;
 		this.partySize = partySize;
 		this.seats = seats;
 	}
@@ -65,21 +55,13 @@ public class Reservation implements Serializable, ReservationInterface {
 		}
 	}
 
-	private void validateDate(String date) {
-		if (date == null || date.trim().isEmpty()) {
-			throw new IllegalArgumentException("Date cannot be blank");
+	private void validateTimestamp(String timestamp) {
+		if (timestamp == null || timestamp.trim().isEmpty()) {
+			throw new IllegalArgumentException("Timestamp cannot be blank");
 		}
-		if (!date.matches(DATE_REGEX)) {
-			throw new IllegalArgumentException("Date must be in format YYYY-MM-DD");
-		}
-	}
 
-	private void validateTime(String time) {
-		if (time == null || time.trim().isEmpty()) {
-			throw new IllegalArgumentException("Time cannot be blank");
-		}
-		if (!time.matches(TIME_REGEX)) {
-			throw new IllegalArgumentException("Time must be in format HH:MM");
+		if (!timestamp.matches(TIMESTAMP_REGEX)) {
+			throw new IllegalArgumentException("Time must be in format YYYY-MM-DD HH:MM");
 		}
 	}
 
@@ -113,15 +95,11 @@ public class Reservation implements Serializable, ReservationInterface {
 		return username;
 	}
 
-	public String getDate() {
-		return date;
-	}
+    public String getTimestamp() {
+        return timestamp;
+    }
 
-	public String getTime() {
-		return time;
-	}
-
-	public int getPartySize() {
+    public int getPartySize() {
 		return partySize;
 	}
 
@@ -139,17 +117,11 @@ public class Reservation implements Serializable, ReservationInterface {
 		this.username = username;
 	}
 
-	public void setDate(String date) {
-		validateDate(date);
-		this.date = date;
-	}
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public void setTime(String time) {
-		validateTime(time);
-		this.time = time;
-	}
-
-	public void setPartySize(int partySize) {
+    public void setPartySize(int partySize) {
 		validatePartySize(partySize);
 		this.partySize = partySize;
 	}
@@ -168,14 +140,13 @@ public class Reservation implements Serializable, ReservationInterface {
 		Reservation r = (Reservation) o;
 		return Objects.equals(name, r.getName())
 				&& Objects.equals(username, r.getUsername())
-				&& Objects.equals(date, r.getDate())
-				&& Objects.equals(time, r.getTime())
+				&& Objects.equals(timestamp, r.getTimestamp())
 				&& partySize == r.partySize
 				&& Objects.equals(seats, r.getSeats());
 	}
 
 	@Override
 	public String toString() {
-		return "Reservation for " + name + " @ " + date + " " + time + " for " + partySize;
+		return "Reservation for " + name + " @ " + timestamp + " for " + partySize;
 	}
 }

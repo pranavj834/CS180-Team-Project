@@ -123,11 +123,10 @@ public class Database implements DatabaseInterface {
 
             for (Reservation r : reservations) {
                 // fullName username YYYY-MM-DD HH:MM partySize
-                out.printf("%s %s %s %s %d%n",
+                out.printf("%s %s %s %d%n",
                         r.getName(),
                         r.getUsername(),
-                        r.getDate(),
-                        r.getTime(),
+                        r.getTimestamp(),
                         r.getPartySize());
 
                 // Second line: list of seat numbers, space-separated
@@ -188,7 +187,7 @@ public class Database implements DatabaseInterface {
                 }
                 seatStatuses.put(timeslot, restaurantSeats);
 
-                Reservation r = new Reservation(fullName, username, date, time, partySize, seatNumbers);
+                Reservation r = new Reservation(fullName, username, timeslot, partySize, seatNumbers);
                 reservations.add(r);
 
                 // also attach reservation to matching account if present
@@ -219,8 +218,7 @@ public class Database implements DatabaseInterface {
     @Override
     public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
         for (Reservation r : reservations) {
-            if (r.getDate().equals(reservation.getDate())
-                    && r.getTime().equals(reservation.getTime())) {
+            if (r.getTimestamp().equals(reservation.getTimestamp())) {
                 return false;
             }
         }
@@ -233,8 +231,7 @@ public class Database implements DatabaseInterface {
         accounts.get(accounts.indexOf(account)).addReservation(reservation);
         reservations.add(reservation);
 
-        String timeslot = reservation.getDate() + " " + reservation.getTime();
-        boolean[] restaurantSeats = seatStatuses.get(timeslot); // get the availabilities at the time
+        boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities at the time
         if (restaurantSeats == null) {
             restaurantSeats = new boolean[30]; // if doesn't exist yet, everything at the timeslot is free
         }
@@ -242,7 +239,7 @@ public class Database implements DatabaseInterface {
         for (Integer seatNumber: seats) {
             restaurantSeats[seatNumber] = true; // mark seats as reserved
         }
-        seatStatuses.put(timeslot, restaurantSeats);
+        seatStatuses.put(reservation.getTimestamp(), restaurantSeats);
         saveToFiles(accountFile, reservationFile);
         return true;
     }
@@ -276,13 +273,12 @@ public class Database implements DatabaseInterface {
         if (removed) {
             reservations.remove(reservation); // only remove if the given account created the reservation
 
-            String timeslot = reservation.getDate() + " " + reservation.getTime();
-            boolean[] restaurantSeats = seatStatuses.get(timeslot); // get the availabilities at the time
+            boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities at the time
             ArrayList<Integer> seats = reservation.getSeats();
             for (Integer seatNumber: seats) {
                 restaurantSeats[seatNumber] = false; // free up seats
             }
-            seatStatuses.put(timeslot, restaurantSeats);
+            seatStatuses.put(reservation.getTimestamp(), restaurantSeats);
             saveToFiles(accountFile, reservationFile);
             return true;
         }

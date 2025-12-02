@@ -13,16 +13,14 @@ public interface ReservationInterface {
     //getters
     String getName();
     String getUsername();
-    String getDate(); //returns the date for the reservation
-    String getTime(); //returns the time for the reservation
+    String getTimestamp();
     int getPartySize(); //returns the number of people reserving the seats
     ArrayList<Integer> getSeats(); //returns the seats of the people who booked the reservation
 
     //setters
     void setName(String name);
     void setUsername(String username);
-    void setDate(String date); //sets the date for the reservation
-    void setTime(String time); //sets the time for the reservation
+    void setTimestamp(String timestamp);
     void setPartySize(int partySize); //sets the number of people reserving the seats
     void setSeats(ArrayList<Integer> seats); //sets aka reserves the seats of the people who booked the reservation
 

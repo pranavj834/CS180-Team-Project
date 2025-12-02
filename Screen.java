@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.GenericArrayType;
 
 /**
  * Provides the GUI.
@@ -19,11 +20,12 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
     private Color text;
     private JButton testButton;
     private JTextField testField;
-    private String testText;
+    private int currentScreen; // 0 - login, 1 - logged in
 
-    public Screen() {
+    public Screen(Client client) {
         background = new Color(35, 37, 40);
         text = new Color(255, 255, 255);
+        currentScreen = 0;
 
         testButton = new JButton("Test");
         testButton.setBounds(50, 100, 100, 30);
@@ -31,35 +33,44 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         testButton.addActionListener(this);
 
         testField = new JTextField();
-        testField.setBounds(50, 50, 100, 30);
+        testField.setBounds(50, 165, 100, 30);
         add(testField);
         testField.addActionListener(this);
-
-        testText = "sample text";
 
         setLayout(null);
         setFocusable(true);
     }
 
-    public Dimension getPreferredSize() {
-        return new Dimension(1366, 768);
-    }
-
     public void paintComponent(Graphics g) {
-        g.setColor(background);
-        g.fillRect(0, 0, 1366, 768);
+        super.paintComponent(g);
+        if (currentScreen == 0) { // logged out
+            setBounds(0, 0, 725, 500);
+            setSize(725, 500);
+            g.setColor(background);
+            g.fillRect(0, 0, 1366, 768);
 
-        g.setFont(new Font("Uni Sans", Font.BOLD, 20));
-        g.setColor(text);
-        g.drawString(testText, 50, 165);
+            g.setFont(new Font("Uni Sans", Font.BOLD, 36));
+            g.setColor(text);
+            g.drawString("Restaurant Reservation Manager", 50, 75);
+            g.setFont(new Font("Uni Sans", Font.BOLD, 25));
+            g.drawString("Welcome!", 50, 120);
+            g.setFont(new Font("Uni Sans", Font.BOLD, 20));
+            g.drawString("Please login or register.", 50, 155);
+        } else if (currentScreen == 1) { // logged in
+            // TODO: implement GUI components to handle methods in Client.java
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == testButton) {
-            testText = testField.getText();
             testField.setText("");
         }
         repaint();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(725, 500);
     }
 }

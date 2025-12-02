@@ -67,8 +67,8 @@ public class UserAccountTest {
 
         ArrayList<Integer> seats = new ArrayList<>();
         seats.add(1);
-        Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10",
-                "18:30", 1, seats);  // partySize matches seats.size()
+        Reservation res = new Reservation("JohnDoe", "johndoe", "2025-11-10 18:30",
+                1, seats);  // partySize matches seats.size()
 
         assertTrue("addReservation should return true when added",
                 acc.addReservation(res));

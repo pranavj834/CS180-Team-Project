@@ -101,7 +101,7 @@ public class DatabaseTest {
 
         ArrayList<Integer> seats = new ArrayList<>(Arrays.asList(5, 6, 7));
         Reservation res = new Reservation("Bob", "user2",
-                "2025-11-23", "19:00", 3, seats);
+                "2025-11-23 19:00", 3, seats);
 
         assertTrue(db.addReservation(acct, res));
 
@@ -117,8 +117,7 @@ public class DatabaseTest {
         Reservation loadedRes = loaded.getReservations().get(0);
         assertEquals("Bob", loadedRes.getName());
         assertEquals("user2", loadedRes.getUsername());
-        assertEquals("2025-11-23", loadedRes.getDate());
-        assertEquals("19:00", loadedRes.getTime());
+        assertEquals("2025-11-23 19:00", loadedRes.getTimestamp());
         assertEquals(3, loadedRes.getPartySize());
         assertEquals(Arrays.asList(5, 6, 7), loadedRes.getSeats());
 
@@ -138,7 +137,7 @@ public class DatabaseTest {
 
         ArrayList<Integer> seats1 = new ArrayList<>(Arrays.asList(1, 2));
         Reservation r1 = new Reservation("Carl", "user3",
-                "2025-11-24", "18:00", 2, seats1);
+                "2025-11-24 18:00", 2, seats1);
 
         assertTrue(db.addReservation(acct, r1));
 
@@ -151,7 +150,7 @@ public class DatabaseTest {
 
         ArrayList<Integer> seats2 = new ArrayList<>(Arrays.asList(3, 4));
         Reservation r2 = new Reservation("Carl", "user3",
-                "2025-11-24", "18:00", 2, seats2);
+                "2025-11-24 18:00", 2, seats2);
 
         assertFalse(loaded.addReservation(loadedAcct, r2));
         assertEquals(1, loaded.getReservations().size());
@@ -168,7 +167,7 @@ public class DatabaseTest {
 
         ArrayList<Integer> seats = new ArrayList<>(Arrays.asList(10, 11));
         Reservation res = new Reservation("Dana", "user4",
-                "2025-11-25", "20:00", 2, seats);
+                "2025-11-25 20:00", 2, seats);
         assertTrue(db.addReservation(acct, res));
 
         assertTrue(db.deleteAccount(acct));
@@ -201,7 +200,7 @@ public class DatabaseTest {
 
         ArrayList<Integer> seats = new ArrayList<>(Arrays.asList(1, 2));
         Reservation res = new Reservation("FakeName", "wrongUser",
-                "2025-12-01", "18:00", 2, seats);
+                "2025-12-01 18:00", 2, seats);
 
         // Attempt to add reservation with an invalid account → must fail
         boolean added = db.addReservation(fake, res);
