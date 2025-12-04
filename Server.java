@@ -79,8 +79,8 @@ public class Server implements Runnable, ServerInterface {
                             availableSeats.add(i);
                         }
                     }
-                    String msg = "Available Seats: " + availableSeats;
-                    out.writeObject(new Packet(PacketType.GET_SEAT_STATUSES_AT_TIME, new Object[]{msg}));
+                    // String msg = "Available Seats: " + availableSeats;
+                    out.writeObject(new Packet(PacketType.GET_SEAT_STATUSES_AT_TIME, new Object[]{statuses}));
 
                 } else if (packet.getType() == PacketType.GET_ACCT_RESERVATIONS) {
                     UserAccount account = (UserAccount) packet.getObj()[0];
