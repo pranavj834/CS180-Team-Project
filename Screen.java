@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version November 10, 2025
+ * @version December 4, 2025
  */
 
 public class Screen extends JPanel implements ActionListener, ScreenInterface {
@@ -34,6 +34,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
     private JButton viewReservationScreenButton;
     private JButton deleteAccountButton;
     private JButton logoutButton;
+    private JTextField nameField2;
     private JTextField timestampField;
     private JTextField partySizeField;
     private JTextField seatsField; // user enters "1,2,3"
@@ -102,19 +103,19 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(backToLoginButton);
 
         makeReservationScreenButton = new JButton("Make Reservation");
-        makeReservationScreenButton.setBounds(50, 150, 200, 40);
+        makeReservationScreenButton.setBounds(265, 150, 200, 40);
         makeReservationScreenButton.addActionListener(this);
         makeReservationScreenButton.setVisible(false);
         add(makeReservationScreenButton);
 
         viewReservationScreenButton = new JButton("View/Edit Reservations");
-        viewReservationScreenButton.setBounds(50, 210, 200, 40);
+        viewReservationScreenButton.setBounds(265, 210, 200, 40);
         viewReservationScreenButton.addActionListener(this);
         viewReservationScreenButton.setVisible(false);
         add(viewReservationScreenButton);
 
         deleteAccountButton = new JButton("Delete Account");
-        deleteAccountButton.setBounds(50, 270, 200, 40);
+        deleteAccountButton.setBounds(265, 270, 200, 40);
         deleteAccountButton.addActionListener(this);
         deleteAccountButton.setBackground(Color.RED);
         deleteAccountButton.setOpaque(true);
@@ -122,10 +123,15 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(deleteAccountButton);
 
         logoutButton = new JButton("Logout");
-        logoutButton.setBounds(50, 330, 200, 40);
+        logoutButton.setBounds(265, 330, 200, 40);
         logoutButton.addActionListener(this);
         logoutButton.setVisible(false);
         add(logoutButton);
+
+        nameField2 = new JTextField();
+        nameField2.setBounds(200, 100, 100, 30);
+        nameField2.setVisible(false);
+        add(nameField2);
 
         timestampField = new JTextField();
         timestampField.setBounds(200, 150, 100, 30);
@@ -161,6 +167,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(backToDashButton);
 
         displayArea = new JTextArea();
+        displayArea.setLineWrap(true);
         displayArea.setEditable(false);
         scrollPane = new JScrollPane(displayArea);
         scrollPane.setBounds(350, 50, 320, 350);
@@ -223,12 +230,13 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             g.drawString("Full name:", 50, 300);
             g.drawString("Email:", 50, 350);
         } else if (currentScreen == 2) { // dashboard
-            g.drawString("Dashboard", 50, 75);
+            g.drawString("Dashboard", 270, 75);
             g.setFont(new Font("Uni Sans", Font.BOLD, 20));
-            g.drawString("What would you like to do?", 50, 120);
+            g.drawString("What would you like to do?", 235, 120);
         } else if (currentScreen == 3) { // make reservation
             g.drawString("New Reservation", 50, 75);
             g.setFont(new Font("Uni Sans", Font.BOLD, 15));
+            g.drawString("Name:", 50, 120);
             g.drawString("Timestamp:", 50, 170);
             g.drawString("Party Size:", 50, 220);
             g.drawString("Seat #s (e.g. 1,2):", 50, 270);
@@ -283,6 +291,8 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         //register logic
         if (e.getSource() == registerButton && currentScreen == 0) {
+            usernameField.setText("");
+            passwordField.setText("");
             currentScreen = 1;
             nameField.setVisible(true);
             emailField.setVisible(true);
@@ -319,6 +329,8 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                 backToLoginButton.setVisible(false);
                 loginButton.setVisible(true);
                 registerButton.setVisible(true);
+                usernameField.setText("");
+                passwordField.setText("");
                 nameField.setText("");
                 emailField.setText("");
             }
@@ -335,6 +347,10 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             backToLoginButton.setVisible(false);
             loginButton.setVisible(true);
             registerButton.setVisible(true);
+            usernameField.setText("");
+            passwordField.setText("");
+            nameField.setText("");
+            emailField.setText("");
             errorLabel.setText("");
             repaint();
             return;
@@ -350,6 +366,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             logoutButton.setVisible(false);
 
             // show reservation fields
+            nameField2.setVisible(true);
             timestampField.setVisible(true);
             partySizeField.setVisible(true);
             seatsField.setVisible(true);
@@ -434,6 +451,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         // --- MAKE RESERVATION LOGIC ---
         if (e.getSource() == submitReservationButton) {
             try {
+                String name = nameField2.getText();
                 String time = timestampField.getText();
                 int size = Integer.parseInt(partySizeField.getText());
                 String seatsStr = seatsField.getText();
@@ -444,11 +462,12 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                     seats.add(Integer.parseInt(s.trim()));
                 }
 
-                boolean success = client.addReservation(null, time, size, seats); // name handled by client/server usually, or passed as null if client fills from account
+                boolean success = client.addReservation(name, time, size, seats); // name handled by client/server usually, or passed as null if client fills from account
 
                 if (success) {
                     errorLabel.setText("Reservation Successful!");
                     // clear fields
+                    nameField2.setText("");
                     timestampField.setText("");
                     partySizeField.setText("");
                     seatsField.setText("");
@@ -472,7 +491,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             if (statuses != null) {
                 StringBuilder sb = new StringBuilder("Availability at " + time + ":\n");
                 for (int i = 0; i < statuses.length; i++) {
-                    sb.append("Seat ").append(i).append(": ");
+                    sb.append("Seat ").append(i + 1).append(": ");
                     if (statuses[i]) sb.append("TAKEN\n");
                     else sb.append("FREE\n");
                 }
@@ -507,6 +526,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                 if (success) {
                     errorLabel.setText("Reservation deleted.");
                     displayArea.setText(client.getReservations());
+                    nameField2.setText("");
                     timestampField.setText("");
                     partySizeField.setText("");
                     seatsField.setText("");
@@ -523,6 +543,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             currentScreen = 2;
 
             // Hide Reservation/View Components
+            nameField2.setVisible(false);
             timestampField.setVisible(false);
             partySizeField.setVisible(false);
             seatsField.setVisible(false);
@@ -535,6 +556,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             scrollPane.setVisible(false);
 
             // reset Field positions for next time (in case we came from screen 4)
+            nameField2.setBounds(200, 100, 100, 30);
             timestampField.setBounds(200, 150, 100, 30);
             partySizeField.setBounds(200, 200, 100, 30);
             seatsField.setBounds(200, 250, 100, 30);
@@ -545,6 +567,10 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             deleteAccountButton.setVisible(true);
             logoutButton.setVisible(true);
 
+            nameField2.setText("");
+            timestampField.setText("");
+            partySizeField.setText("");
+            seatsField.setText("");
             errorLabel.setText("");
             repaint();
         }

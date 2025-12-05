@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version November 24, 2025
+ * @version December 4, 2025
  */
 
 public class Client implements ClientInterface {
@@ -208,7 +208,7 @@ public class Client implements ClientInterface {
             if (reservations.isEmpty()) {
                 str += "0\n";
             } else {
-                str += reservations.size();
+                str += reservations.size() + "\n";
                 for (Reservation r : reservations) {
                     str = str + r + "\n";
                 }
