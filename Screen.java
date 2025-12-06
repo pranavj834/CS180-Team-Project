@@ -13,10 +13,11 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author jastip, chan531, lab sec L23
- * @version December 4, 2025
+ * @version December 6, 2025
  */
 
 public class Screen extends JPanel implements ActionListener, ScreenInterface {
+    //instance variables
     private Color background;
     private Color text;
 
@@ -54,10 +55,11 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
     private JLabel errorLabel;
 
-    // 0-Login, 1-Register, 2-Dashboard, 3-Make Reservation, 4-View/Manage
+    // Screen #-What screen they lead to: 0-Login, 1-Register, 2-Dashboard, 3-Make Reservation, 4-View/Manage
     private int currentScreen;
     private Client client;
 
+    //constructors
     public Screen(Client client) {
         this.client = client;
         background = new Color(35, 37, 40);
@@ -227,7 +229,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         setLayout(null);
         setFocusable(true);
     }
-
+    //sets the GUI for various screens
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         setBounds(0, 0, 725, 500);
@@ -279,6 +281,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         }
     }
 
+    //provides logic for various actions
     @Override
     public void actionPerformed(ActionEvent e) {
         //login logic

@@ -11,17 +11,19 @@ import java.util.List;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, zhu1220, lab sec L23
- * @version November 24, 2025
+ * @version December 6, 2025
  */
 
 public class Database implements DatabaseInterface {
+
+    //instance variables
     private final ArrayList<UserAccount> accounts;
     private final ArrayList<Reservation> reservations;
     private final HashMap<String, boolean[]> seatStatuses;
     private String accountFile;
     private String reservationFile;
 
-    // initializes arraylists
+    // constructor; initializes arraylists
     public Database(String accountFile, String reservationFile) {
         accounts = new ArrayList<>();
         reservations = new ArrayList<>();
@@ -97,6 +99,7 @@ public class Database implements DatabaseInterface {
         }
     }
 
+    //loads accounts from the database
     private void loadAccounts(String accountFile) throws IOException {
         File f = new File(accountFile);
         if (!f.exists()) {
@@ -155,6 +158,7 @@ public class Database implements DatabaseInterface {
         }
     }
 
+    //loads reservations from database
     private void loadReservations(String reservationFile) throws IOException {
         File f = new File(reservationFile);
         if (!f.exists()) {
@@ -234,7 +238,7 @@ public class Database implements DatabaseInterface {
     @Override
     public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
         for (Reservation r : reservations) {
-            if (r.getTimestamp().equals(reservation.getTimestamp())) {
+            if (r.getTimestamp().equals(reservation.getTimestamp()) && r.getSeats().equals(reservation.getSeats())) {
                 return false;
             }
         }

@@ -12,18 +12,19 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version November 24, 2025
+ * @version December 6, 2025
  */
 
 public class Server implements Runnable, ServerInterface {
-
+    //instance variables
     private static final int PORT = 500;
     private static Database db;
 
+    //constructor
     public Server() {
         db = new Database("accounts.txt", "reservations.txt");
     }
-
+    //connects with client and handles actions by the user
     private void handleClient(Socket socket, Server server) {
         try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {

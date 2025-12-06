@@ -12,20 +12,22 @@ import java.util.Objects;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *  * @author zhu1220, chan531
- *  * @version November 24, 2025
+ *  * @version December 6, 2025
  */
 
 public class Reservation implements Serializable, ReservationInterface {
 
+    //instance variables
 	private static final long serialVersionUID = 1L;
-	private static final String TIMESTAMP_REGEX = "^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}$";
+	private static final String TIMESTAMP_REGEX = "^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}$"; //used to check for format
 
 	private String name;
 	private String username;
-	private String timestamp;   // "YYYY-MM-DD"
+	private String timestamp;   // "YYYY-MM-DD is the correct format"
 	private int partySize;
 	private ArrayList<Integer> seats;
 
+    //constructor; validates parameters and sets them to their respective variables
 	public Reservation(String name, String username, String timestamp,
 					   int partySize, ArrayList<Integer> seats) {
 		validateName(name);
