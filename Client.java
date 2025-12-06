@@ -147,10 +147,14 @@ public class Client implements ClientInterface {
         }
     }
 
-    public boolean deleteReservation(String timestamp,
+    public boolean deleteReservation(String name, String timestamp,
                                      int partySize, ArrayList<Integer> seats) {
-        Reservation reservationToDelete = new Reservation(currentAccount.getFullName(),
+        System.out.println("client delete reservation");
+        Reservation reservationToDelete = new Reservation(name,
                 currentAccount.getUsername(), timestamp, partySize, seats);
+        System.out.println(reservationToDelete);
+        System.out.println(currentAccount.getUsername());
+        System.out.println(seats);
 
         Packet request = new Packet(PacketType.DELETE_RESERVATION, new Object[]{currentAccount, reservationToDelete});
         Packet response = null;
@@ -162,7 +166,7 @@ public class Client implements ClientInterface {
         } catch (ClassNotFoundException e) {
             System.err.println("Serialization error: " + e.getMessage());
         }
-
+        //System.out.println(response.getObj()[0]);
         if (response.getObj() != null && (boolean) response.getObj()[0]) {
             return true;
         } else {

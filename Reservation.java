@@ -138,11 +138,11 @@ public class Reservation implements Serializable, ReservationInterface {
 	public boolean equals(Object o) {
 		if (!(o instanceof Reservation)) return false;
 		Reservation r = (Reservation) o;
-		return Objects.equals(name, r.getName())
-				&& Objects.equals(username, r.getUsername())
-				&& Objects.equals(timestamp, r.getTimestamp())
+		return name.equals(r.getName())
+				&& username.equals(r.getUsername())
+				&& timestamp.equals(r.getTimestamp())
 				&& partySize == r.partySize
-				&& Objects.equals(seats, r.getSeats());
+				&& seats.equals(r.getSeats());
 	}
 
 	@Override

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
- * @author chan531, lab sec L23
+ * @author jastip, chan531, lab sec L23
  * @version December 4, 2025
  */
 
@@ -46,6 +47,10 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
     private JButton deleteReservationButton;
     private JButton refreshReservationButton;
     private JButton printDbButton;
+    private JPanel seatingDisplay;
+    private JLabel[][] grid;
+    private int row = 5;
+    private int col = 6;
 
     private JLabel errorLabel;
 
@@ -161,7 +166,6 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(checkSeatsButton);
 
         backToDashButton = new JButton("Main Menu");
-        backToDashButton.setBounds(50, 400, 150, 30);
         backToDashButton.addActionListener(this);
         backToDashButton.setVisible(false);
         add(backToDashButton);
@@ -170,7 +174,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         displayArea.setLineWrap(true);
         displayArea.setEditable(false);
         scrollPane = new JScrollPane(displayArea);
-        scrollPane.setBounds(350, 50, 320, 350);
+        scrollPane.setBounds(350, 100, 320, 150);
         scrollPane.setVisible(false);
         add(scrollPane);
 
@@ -181,7 +185,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(refreshReservationButton);
 
         deleteReservationButton = new JButton("Delete Above");
-        deleteReservationButton.setBounds(50, 300, 150, 30);
+        deleteReservationButton.setBounds(50, 340, 150, 30);
         deleteReservationButton.addActionListener(this);
         deleteReservationButton.setVisible(false);
         add(deleteReservationButton);
@@ -194,8 +198,31 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         errorLabel = new JLabel("");
         errorLabel.setForeground(Color.RED);
-        errorLabel.setBounds(50, 420, 600, 30);
+        errorLabel.setBounds(50, 440, 600, 30);
         add(errorLabel);
+
+        seatingDisplay = new JPanel();
+        seatingDisplay.setBounds(350, 270, 320, 170);
+        seatingDisplay.setLayout(new GridLayout(row, col));
+
+        grid = new JLabel[row][col];
+        int seatNum = 0;
+        for (int i = 0; i < row; i++){
+            for (int j = 0; j < col; j++){
+                grid[i][j] = new JLabel();
+                grid[i][j].setBorder(new LineBorder(background, 1));
+                grid[i][j].setBackground(new Color(55, 55, 55));
+                grid[i][j].setOpaque(true);
+                seatingDisplay.add(grid[i][j]);
+
+                grid[i][j].setText(String.valueOf(seatNum));
+                grid[i][j].setHorizontalAlignment(SwingConstants.CENTER);
+                grid[i][j].setForeground(Color.WHITE);
+                seatNum++;
+            }
+        }
+        seatingDisplay.setVisible(false);
+        add(seatingDisplay);
 
         setLayout(null);
         setFocusable(true);
@@ -245,9 +272,10 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             g.setFont(new Font("Uni Sans", Font.BOLD, 14));
             g.drawString("To delete, enter exact details", 50, 150);
             g.drawString("into the fields below:", 50, 170);
-            g.drawString("Time:", 50, 200);
-            g.drawString("Size:", 50, 240);
-            g.drawString("Seats:", 50, 280);
+            g.drawString("Name:", 50, 200);
+            g.drawString("Time:", 50, 240);
+            g.drawString("Size:", 50, 280);
+            g.drawString("Seats:", 50, 320);
         }
     }
 
@@ -319,7 +347,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
             boolean added = client.addAccount(user, pass, full, email);
             if (!added) {
-                errorLabel.setText("Account already exists.");
+                errorLabel.setText("Account already exists or username is taken.");
             } else {
                 errorLabel.setText("Account created. Please login.");
                 currentScreen = 0;
@@ -376,7 +404,13 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
             // re-use display area for seat check
             scrollPane.setVisible(true);
-            displayArea.setText("Enter a timestamp (YYYY-MM-DD HH:MM) and click\nCheck Availability to see seats.");
+            displayArea.setText("Enter a timestamp (YYYY-MM-DD HH:MM) and click Check Availability to see seats.");
+            seatingDisplay.setVisible(true);
+            for (int i = 0; i < row; i++){
+                for (int j = 0; j < col; j++){
+                    grid[i][j].setBackground(new Color(55, 55, 55));
+                }
+            }
 
             errorLabel.setText("");
             repaint();
@@ -391,14 +425,16 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             logoutButton.setVisible(false);
 
             // show view fields
+            nameField2.setVisible(true);
             timestampField.setVisible(true);
             partySizeField.setVisible(true);
             seatsField.setVisible(true);
 
             // position them for deletion
-            timestampField.setBounds(100, 180, 150, 30);
-            partySizeField.setBounds(100, 220, 150, 30);
-            seatsField.setBounds(100, 260, 150, 30);
+            nameField2.setBounds(100, 180, 150, 30);
+            timestampField.setBounds(100, 220, 150, 30);
+            partySizeField.setBounds(100, 260, 150, 30);
+            seatsField.setBounds(100, 300, 150, 30);
 
             refreshReservationButton.setVisible(true);
             printDbButton.setVisible(true);
@@ -471,6 +507,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                     timestampField.setText("");
                     partySizeField.setText("");
                     seatsField.setText("");
+                    errorLabel.setText("");
                     displayArea.setText("Reservation booked.");
                 } else {
                     errorLabel.setText("Failed: overlap or invalid data.");
@@ -483,19 +520,39 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         if (e.getSource() == checkSeatsButton) {
             String time = timestampField.getText();
-            if (time.isEmpty()) {
+            if (time.isEmpty() || !time.matches("^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}$")) {
                 errorLabel.setText("Enter timestamp (YYYY-MM-DD HH:MM) to check.");
+                displayArea.setText("");
                 return;
             }
             boolean[] statuses = client.updateSeatStatuses(time);
             if (statuses != null) {
                 StringBuilder sb = new StringBuilder("Availability at " + time + ":\n");
                 for (int i = 0; i < statuses.length; i++) {
-                    sb.append("Seat ").append(i + 1).append(": ");
-                    if (statuses[i]) sb.append("TAKEN\n");
-                    else sb.append("FREE\n");
+                    sb.append("Seat ").append(i).append(": ");
+                    if (statuses[i]) {
+                        sb.append("TAKEN\n");
+                    } else {
+                        sb.append("FREE\n");
+                    }
+                }
+
+                // Update Visual Grid
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < col; j++) {
+                        int seatIndex = (i * col) + j;
+
+                        if (seatIndex < statuses.length) {
+                            if (statuses[seatIndex]) {
+                                grid[i][j].setBackground(new Color(128, 67, 67)); // Red for Taken
+                            } else {
+                                grid[i][j].setBackground(new Color(93, 138, 96)); // Green for Free
+                            }
+                        }
+                    }
                 }
                 displayArea.setText(sb.toString());
+                errorLabel.setText("");
             } else {
                 displayArea.setText("Could not get statuses.");
             }
@@ -512,17 +569,17 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         if (e.getSource() == deleteReservationButton) {
             try {
+                String name = nameField2.getText();
                 String time = timestampField.getText();
                 int size = Integer.parseInt(partySizeField.getText());
                 String seatsStr = seatsField.getText();
-
                 ArrayList<Integer> seats = new ArrayList<>();
                 String[] split = seatsStr.split(",");
                 for (String s : split) {
                     seats.add(Integer.parseInt(s.trim()));
                 }
 
-                boolean success = client.deleteReservation(time, size, seats);
+                boolean success = client.deleteReservation(name, time, size, seats);
                 if (success) {
                     errorLabel.setText("Reservation deleted.");
                     displayArea.setText(client.getReservations());
@@ -566,6 +623,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             viewReservationScreenButton.setVisible(true);
             deleteAccountButton.setVisible(true);
             logoutButton.setVisible(true);
+            seatingDisplay.setVisible(false);
 
             nameField2.setText("");
             timestampField.setText("");

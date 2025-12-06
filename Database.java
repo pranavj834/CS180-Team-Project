@@ -68,6 +68,17 @@ public class Database implements DatabaseInterface {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        for (Reservation reservation: reservations) {
+            String username = reservation.getUsername();
+            for (UserAccount account: accounts) {
+                if (account.getUsername().equals(username)) {
+                    System.out.println("added " + reservation + " to " + account);
+                    account.addReservation(reservation);
+                    break;
+                }
+            }
+        }
     }
 
     // ---------- internal: accounts ----------
@@ -209,6 +220,11 @@ public class Database implements DatabaseInterface {
         if (accounts.contains(account)) {
             return false;
         }
+        for (UserAccount acct: accounts) {
+            if (acct.getUsername().equals(account.getUsername())) {
+                return false;
+            }
+        }
         accounts.add(account);
         saveToFiles(accountFile, reservationFile);
         return true;
@@ -229,6 +245,7 @@ public class Database implements DatabaseInterface {
         }
 
         accounts.get(accounts.indexOf(account)).addReservation(reservation);
+        account.addReservation(reservation);
         reservations.add(reservation);
 
         boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities at the time
@@ -263,8 +280,10 @@ public class Database implements DatabaseInterface {
     @Override
     public synchronized boolean deleteReservation(UserAccount account, Reservation reservation) {
         // fail if account doesn't exist
+        System.out.println("database delete reservation");
         int index = accounts.indexOf(account);
         if (index == -1) {
+            System.out.println("account not found");
             return false;
         }
 
