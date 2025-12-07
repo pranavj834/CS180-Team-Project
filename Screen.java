@@ -210,8 +210,8 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         grid = new JLabel[row][col];
         int seatNum = 0;
-        for (int i = 0; i < row; i++){
-            for (int j = 0; j < col; j++){
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
                 grid[i][j] = new JLabel();
                 grid[i][j].setBorder(new LineBorder(background, 1));
                 grid[i][j].setBackground(new Color(55, 55, 55));
@@ -269,7 +269,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             g.drawString("Name:", 50, 120);
             g.drawString("Timestamp:", 50, 170);
             g.drawString("Party Size:", 50, 220);
-            g.drawString("Seat #s (e.g. 1,2):", 50, 270);
+            g.drawString("Seat #s (e.g. 1,2,3):", 50, 270);
         } else if (currentScreen == 4) { // view/edit reservation
             g.drawString("My Reservations", 50, 75);
             g.setFont(new Font("Uni Sans", Font.BOLD, 14));
@@ -518,6 +518,12 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                 }
             } catch (Exception ex) {
                 errorLabel.setText("Invalid format. Use numbers for size/seats.");
+            }
+
+            for (int i = 0; i < row; i++) { // clear grid
+                for (int j = 0; j < col; j++) {
+                    grid[i][j].setBackground(new Color(55, 55, 55));
+                }
             }
             repaint();
         }
