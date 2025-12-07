@@ -11,6 +11,9 @@ present a command-line menu interface.
 
 Ensure the server is running before attempting to run the client.
 
+#### Ryan Chan - Submitted Vocareum workspace
+#### Pranav Jasti - Submitted presentation and report on Brightspace
+
 ## Core Classes
 ### Database.java
 
