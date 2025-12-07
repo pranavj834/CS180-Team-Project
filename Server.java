@@ -98,6 +98,7 @@ public class Server implements Runnable, ServerInterface {
                     System.out.println("Packet type not recognized.");
                     out.writeObject(new Packet(PacketType.INVALID));
                 }
+                out.reset();
                 out.flush();
             }
 

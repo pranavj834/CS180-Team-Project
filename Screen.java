@@ -168,6 +168,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         add(checkSeatsButton);
 
         backToDashButton = new JButton("Main Menu");
+        backToDashButton.setBounds(50, 400, 150, 30);
         backToDashButton.addActionListener(this);
         backToDashButton.setVisible(false);
         add(backToDashButton);
