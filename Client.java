@@ -105,7 +105,9 @@ public class Client implements ClientInterface {
         }
     }
 
-    //adds a reservation when user wants to book reservation
+    /*adds a reservation when user wants to book reservation; checks if the booking is
+    between 9 AM to 9 PM because those are the hours of operation
+     */
     public boolean addReservation(String name, String timestamp,
                                   int partySize, ArrayList<Integer> seats) {
         try {
