@@ -491,6 +491,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
         // --- MAKE RESERVATION LOGIC ---
         if (e.getSource() == submitReservationButton) {
             try {
+                // 1. Parse the data first
                 String name = nameField2.getText();
                 String time = timestampField.getText();
                 int size = Integer.parseInt(partySizeField.getText());
@@ -502,28 +503,36 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                     seats.add(Integer.parseInt(s.trim()));
                 }
 
-                boolean success = client.addReservation(name, time, size, seats); // name handled by client/server usually, or passed as null if client fills from account
+                // 2. TRIGGER CONFIRMATION DIALOG HERE
+                int response = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to book this reservation?",
+                        "Confirm Booking",
+                        JOptionPane.YES_NO_OPTION);
 
-                if (success) {
-                    errorLabel.setText("Reservation Successful!");
-                    // clear fields
-                    nameField2.setText("");
-                    timestampField.setText("");
-                    partySizeField.setText("");
-                    seatsField.setText("");
-                    errorLabel.setText("");
-                    displayArea.setText("Reservation booked.");
-                } else {
-                    errorLabel.setText("Failed: overlap or invalid data.");
+                // 3. Only proceed if user clicks "Yes"
+                if (response == JOptionPane.YES_OPTION) {
+                    boolean success = client.addReservation(name, time, size, seats);
+
+                    if (success) {
+                        errorLabel.setText("Reservation Successful!");
+                        nameField2.setText("");
+                        timestampField.setText("");
+                        partySizeField.setText("");
+                        seatsField.setText("");
+                        displayArea.setText("Reservation booked.");
+
+                        // Clear grid on success
+                        for (int i = 0; i < row; i++) {
+                            for (int j = 0; j < col; j++) {
+                                grid[i][j].setBackground(new Color(55, 55, 55));
+                            }
+                        }
+                    } else {
+                        errorLabel.setText("Failed: overlap or invalid data.");
+                    }
                 }
             } catch (Exception ex) {
                 errorLabel.setText("Invalid format. Use numbers for size/seats.");
-            }
-
-            for (int i = 0; i < row; i++) { // clear grid
-                for (int j = 0; j < col; j++) {
-                    grid[i][j].setBackground(new Color(55, 55, 55));
-                }
             }
             repaint();
         }
@@ -579,6 +588,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
         if (e.getSource() == deleteReservationButton) {
             try {
+                // 1. Parse data
                 String name = nameField2.getText();
                 String time = timestampField.getText();
                 int size = Integer.parseInt(partySizeField.getText());
@@ -589,16 +599,25 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                     seats.add(Integer.parseInt(s.trim()));
                 }
 
-                boolean success = client.deleteReservation(name, time, size, seats);
-                if (success) {
-                    errorLabel.setText("Reservation deleted.");
-                    displayArea.setText(client.getReservations());
-                    nameField2.setText("");
-                    timestampField.setText("");
-                    partySizeField.setText("");
-                    seatsField.setText("");
-                } else {
-                    errorLabel.setText("Delete failed. Details must match exactly.");
+                // 2. TRIGGER CONFIRMATION DIALOG HERE
+                int response = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to DELETE this reservation?",
+                        "Confirm Deletion",
+                        JOptionPane.YES_NO_OPTION);
+
+                // 3. Only proceed if user clicks "Yes"
+                if (response == JOptionPane.YES_OPTION) {
+                    boolean success = client.deleteReservation(name, time, size, seats);
+                    if (success) {
+                        errorLabel.setText("Reservation deleted.");
+                        displayArea.setText(client.getReservations());
+                        nameField2.setText("");
+                        timestampField.setText("");
+                        partySizeField.setText("");
+                        seatsField.setText("");
+                    } else {
+                        errorLabel.setText("Delete failed. Details must match exactly.");
+                    }
                 }
             } catch (Exception ex) {
                 errorLabel.setText("Invalid format.");

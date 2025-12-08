@@ -108,6 +108,30 @@ public class Client implements ClientInterface {
     //adds a reservation when user wants to book reservation
     public boolean addReservation(String name, String timestamp,
                                   int partySize, ArrayList<Integer> seats) {
+        try {
+            if (timestamp == null || timestamp.length() < 16) {
+                return false;
+            }
+
+            String timePart = timestamp.substring(11, 16);
+            String hourString = timePart.substring(0, 2);
+            int hour = Integer.parseInt(hourString);
+
+            if (hour < 9 || hour > 21) {
+                return false;
+            }
+
+            if (hour == 21) {
+                String minuteString = timePart.substring(3, 5);
+                int minute = Integer.parseInt(minuteString);
+                if (minute > 0) {
+                    return false;
+                }
+            }
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
         Reservation reservation = new Reservation(name, currentAccount.getUsername(), timestamp, partySize, seats);
         Packet request = new Packet(PacketType.ADD_RESERVATION, new Object[]{currentAccount, reservation});
         Packet response = null;
