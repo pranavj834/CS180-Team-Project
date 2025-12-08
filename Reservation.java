@@ -11,8 +11,9 @@ import java.util.Objects;
  * - seatNumbers must be non-empty, all > 0, and size must equal partySize
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
- *  * @author zhu1220, chan531
- *  * @version December 6, 2025
+ *
+ * @author zhu1220, chan531
+ * @version December 6, 2025
  */
 
 public class Reservation implements Serializable, ReservationInterface {
@@ -47,42 +48,42 @@ public class Reservation implements Serializable, ReservationInterface {
 
 	private void validateName(String n) {
 		if (n == null || n.trim().isEmpty()) {
-			throw new IllegalArgumentException("Reservation name cannot be blank");
+			throw new IllegalArgumentException("Reservation name cannot be blank.");
 		}
 	}
 
 	private void validateUsername(String un) {
 		if (un == null || un.trim().isEmpty()) {
-			throw new IllegalArgumentException("Reservation username cannot be blank");
+			throw new IllegalArgumentException("Reservation username cannot be blank.");
 		}
 	}
 
 	private void validateTimestamp(String ts) {
 		if (ts == null || ts.trim().isEmpty()) {
-			throw new IllegalArgumentException("Timestamp cannot be blank");
+			throw new IllegalArgumentException("Timestamp cannot be blank.");
 		}
 
 		if (!ts.matches(TIMESTAMP_REGEX)) {
-			throw new IllegalArgumentException("Time must be in format YYYY-MM-DD HH:MM");
+			throw new IllegalArgumentException("Time must be in format YYYY-MM-DD HH:MM.");
 		}
 	}
 
 	private void validatePartySize(int ps) {
 		if (ps <= 0) {
-			throw new IllegalArgumentException("Party size must be greater than 0");
+			throw new IllegalArgumentException("Party size must be greater than 0.");
 		}
 	}
 
-	private void validateSeats(ArrayList<Integer> seats, int partySize) {
-		if (seats == null || seats.isEmpty()) {
-			throw new IllegalArgumentException("Seat list cannot be empty");
+	private void validateSeats(ArrayList<Integer> s, int ps) {
+		if (s == null || s.isEmpty()) {
+			throw new IllegalArgumentException("Seat list cannot be empty.");
 		}
-		if (seats.size() != partySize) {
-			throw new IllegalArgumentException("Number of seats must equal party size");
+		if (s.size() != ps) {
+			throw new IllegalArgumentException("Number of seats must equal party size.");
 		}
-		for (Integer s : seats) {
-			if (s == null || s < 0 || s > 29) {
-				throw new IllegalArgumentException("Seat numbers must be within the range 0-29 inclusive");
+		for (Integer seat : s) {
+			if (seat < 0 || seat > 29) {
+				throw new IllegalArgumentException("Seat numbers must be within the range 0-29 inclusive.");
 			}
 		}
 	}

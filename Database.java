@@ -33,15 +33,6 @@ public class Database implements DatabaseInterface {
         loadFromFiles(accountFile, reservationFile);
     }
 
-    // =============== PERSISTENCE API =================
-
-    /**
-     * Saves all accounts and reservations to the given text files.
-     *
-     * @param accFile      path for accounts file
-     * @param resFile  path for reservations file
-     * @throws IOException if writing fails
-     */
     @Override
     public synchronized void saveToFiles(String accFile, String resFile) {
         try {
@@ -52,14 +43,6 @@ public class Database implements DatabaseInterface {
         }
     }
 
-    /**
-     * Loads all accounts and reservations from the given text files.
-     * Existing in-memory data is cleared first.
-     *
-     * @param accFile      path for accounts file
-     * @param resFile  path for reservations file
-     * @throws IOException if reading fails
-     */
     @Override
     public synchronized void loadFromFiles(String accFile, String resFile) {
         accounts.clear();
@@ -90,7 +73,7 @@ public class Database implements DatabaseInterface {
             out.println(accounts.size());
             for (UserAccount account : accounts) {
                 // username password fullName email
-                out.printf("%s %s %s %s%n",
+                out.printf("%s,%s,%s,%s%n",
                         account.getUsername(),
                         account.getPassword(),
                         account.getFullName(),
@@ -114,7 +97,7 @@ public class Database implements DatabaseInterface {
             for (int i = 0; i < count; i++) {
                 String data = br.readLine();
                 if (data == null) break;
-                String[] parts = data.split(" ");
+                String[] parts = data.split(",");
                 if (parts.length < 4) continue;
 
                 String username = parts[0];
@@ -137,18 +120,18 @@ public class Database implements DatabaseInterface {
 
             for (Reservation r : reservations) {
                 // fullName username YYYY-MM-DD HH:MM partySize
-                out.printf("%s %s %s %d%n",
+                out.printf("%s,%s,%s,%d%n",
                         r.getName(),
                         r.getUsername(),
                         r.getTimestamp(),
                         r.getPartySize());
 
-                // Second line: list of seat numbers, space-separated
+                // seat numbers
                 List<Integer> seats = r.getSeats();
                 if (seats != null && !seats.isEmpty()) {
                     for (int i = 0; i < seats.size(); i++) {
                         if (i > 0) {
-                            out.print(" ");
+                            out.print(",");
                         }
                         out.print(seats.get(i));
                     }
@@ -174,7 +157,7 @@ public class Database implements DatabaseInterface {
                 String header = br.readLine();
                 if (header == null) break;
 
-                String[] parts = header.split(" ");
+                String[] parts = header.split(",");
                 if (parts.length < 5) continue;
 
                 String fullName = parts[0];

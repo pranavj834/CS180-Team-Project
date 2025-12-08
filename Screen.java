@@ -350,9 +350,22 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                 errorLabel.setText("Fill all fields.");
                 repaint();
                 return;
+            } else if (user.contains(",") || pass.contains(",") || full.contains(",") || email.contains(",")) {
+                errorLabel.setText("Fields cannot contain commas.");
+                repaint();
+                return;
             }
 
-            boolean added = client.addAccount(user, pass, full, email);
+            boolean added;
+            try {
+                added = client.addAccount(user, pass, full, email);
+            } catch (Exception ex) {
+                errorLabel.setText(ex.getMessage());
+                added = false;
+                repaint();
+                return;
+            }
+
             if (!added) {
                 errorLabel.setText("Account already exists or username is taken.");
             } else {
@@ -414,8 +427,8 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
             displayArea.setText("Enter a timestamp (YYYY-MM-DD HH:MM) and click Check Availability to see seats.\n" +
                     "Hours of operation are 09:00 to 21:00 inclusive.");
             seatingDisplay.setVisible(true);
-            for (int i = 0; i < row; i++){
-                for (int j = 0; j < col; j++){
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < col; j++) {
                     grid[i][j].setBackground(new Color(55, 55, 55));
                 }
             }
