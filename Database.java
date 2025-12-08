@@ -5,13 +5,15 @@ import java.util.List;
 
 /**
  * Stores UserAccount and Reservation info to be
- * accessed by the server. Saves information to
- * text files and retains information in between runs.
+ * accessed by the server. Saves information in CSV
+ * format to text files and retains information in
+ * between runs. Validates seat numbers and their
+ * availabilities when adding reservations.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, zhu1220, lab sec L23
- * @version December 6, 2025
+ * @version December 8, 2025
  */
 
 public class Database implements DatabaseInterface {
@@ -223,15 +225,15 @@ public class Database implements DatabaseInterface {
         String timestamp = reservation.getTimestamp();
         boolean[] currentSeatsAtTime = seatStatuses.get(timestamp);
 
-        System.out.println("database attempting to add");
+        //S ystem.out.println("database attempting to add");
         if (currentSeatsAtTime != null) {
-            for (Integer requestedSeat : reservation.getSeats()) { // validate seats availability
+            for (Integer requestedSeat : reservation.getSeats()) { // check if each seat is within bounds & available
                 if (requestedSeat < 0 || requestedSeat > 29) {
-                    System.out.println("out of bounds");
+                    // System.out.println("out of bounds");
                     return false;
                 }
                 if (currentSeatsAtTime[requestedSeat]) {
-                    System.out.println("seat(s) already taken");
+                    // System.out.println("seat(s) already taken");
                     return false;
                 }
             }

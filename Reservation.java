@@ -1,6 +1,5 @@
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * Represents a reservation with basic input validation:
@@ -13,7 +12,7 @@ import java.util.Objects;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author zhu1220, chan531
- * @version December 6, 2025
+ * @version December 8, 2025
  */
 
 public class Reservation implements Serializable, ReservationInterface {

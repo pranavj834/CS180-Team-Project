@@ -2,21 +2,21 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
- * Provides the GUI.
- * NOTE: Screen is currently non-functional and is not
- *       meant to be run or tested. It, along with this
- *       class, are placeholders at the time of writing.
+ * Provides the GUI. Users can register, login, check
+ * availability, and create/delete accounts/reservations
+ * (note: users can only delete their own
+ * account/reservations). Provides error messages and
+ * hints on how to input information.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author jastip, chan531, lab sec L23
- * @version December 7, 2025
+ * @version December 8, 2025
  */
 
 public class Screen extends JPanel implements ActionListener, ScreenInterface {
@@ -351,7 +351,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                 repaint();
                 return;
             } else if (user.contains(",") || pass.contains(",") || full.contains(",") || email.contains(",")) {
-                errorLabel.setText("Fields cannot contain commas.");
+                errorLabel.setText("Fields cannot contain commas.f");
                 repaint();
                 return;
             }
@@ -540,7 +540,7 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                         errorLabel.setText("Failed: reservation outside the next seven days.");
                     } else {
                         int addedReservation = client.addReservation(name, time, size, seats);
-                        System.out.println(addedReservation);
+                        // System.out.println(addedReservation);
                         if (addedReservation == 1) {
                             displayArea.setText("Reservation booked.");
 

@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author chan531, lab sec L23
- * @version December 7, 2025
+ * @version December 8, 2025
  */
 
 public class Client implements ClientInterface {
@@ -23,12 +23,10 @@ public class Client implements ClientInterface {
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private boolean loggedIn; //to make sure the user is logged in to access other facilities
     private UserAccount currentAccount; //sets the account for storing reservations in the correct account
 
     //constructor
     public Client() {
-        loggedIn = false;
         currentAccount = null;
 
         //server and client connect
@@ -58,7 +56,7 @@ public class Client implements ClientInterface {
         });
     }
 
-    //checks if the user entered their username and password details properly
+    // checks if the user entered their username and password details properly
     public UserAccount login(String username, String password) {
         currentAccount = new UserAccount(username, password,
                 "placeholder", "p@p.com");
@@ -75,7 +73,6 @@ public class Client implements ClientInterface {
 
         currentAccount = (UserAccount) response.getObj()[0];
         if (currentAccount != null) {
-            loggedIn = true;
             return currentAccount;
         } else {
             return null;
@@ -105,9 +102,11 @@ public class Client implements ClientInterface {
         }
     }
 
-    /*adds a reservation when user wants to book reservation; checks if the booking is
-    between 9 AM to 9 PM because those are the hours of operation
-     */
+    // adds a reservation when user wants to book reservation; checks if the booking is
+    // in the hours of operation (09:00 - 21:00 inclusive).
+    //
+    // returns 1 if successfully added, 0 if not added due to other reasons, -1 due to invalid input,
+    // and -2 due to timestamp outside hours of operation.
     public int addReservation(String name, String timestamp,
                                   int partySize, ArrayList<Integer> seats) {
         try {
@@ -134,9 +133,11 @@ public class Client implements ClientInterface {
         } catch (NumberFormatException e) {
             return -1;
         }
+
         Reservation reservation = new Reservation(name, currentAccount.getUsername(), timestamp, partySize, seats);
         Packet request = new Packet(PacketType.ADD_RESERVATION, new Object[]{currentAccount, reservation});
         Packet response = null;
+
         try {
             out.writeObject(request);
             response = (Packet) in.readObject();
@@ -166,7 +167,6 @@ public class Client implements ClientInterface {
             System.err.println("Serialization error: " + e.getMessage());
         }
 
-        loggedIn = false;
         if (response.getObj() != null && (boolean) response.getObj()[0]) {
             System.out.println("Account successfully deleted.");
             currentAccount = null;
@@ -179,12 +179,12 @@ public class Client implements ClientInterface {
 
     public boolean deleteReservation(String name, String timestamp,
                                      int partySize, ArrayList<Integer> seats) {
-        System.out.println("client delete reservation");
+        // System.out.println("client delete reservation");
         Reservation reservationToDelete = new Reservation(name,
                 currentAccount.getUsername(), timestamp, partySize, seats);
-        System.out.println(reservationToDelete);
-        System.out.println(currentAccount.getUsername());
-        System.out.println(seats);
+        // System.out.println(reservationToDelete);
+        // System.out.println(currentAccount.getUsername());
+        // System.out.println(seats);
 
         Packet request = new Packet(PacketType.DELETE_RESERVATION, new Object[]{currentAccount, reservationToDelete});
         Packet response = null;
@@ -217,7 +217,7 @@ public class Client implements ClientInterface {
         if (response.getObj() != null && response.getObj()[0] instanceof boolean[]) {
             return (boolean[]) response.getObj()[0];
         } else {
-            System.out.println("Invalid seat statuses");
+            // System.out.println("Invalid seat statuses");
             return null;
         }
     }

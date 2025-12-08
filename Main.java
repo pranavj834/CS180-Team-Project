@@ -13,8 +13,8 @@ import java.util.Scanner;
  * @version Dec 1, 2025
  */
 
-public class Main {
-    public static void main(String[] args) {
+//public class Main {
+//    public static void main(String[] args) {
 //        Scanner sc = new Scanner(System.in);
 //        Database db = new Database("accounts.txt", "reservations.txt");
 //        System.out.println("Database Testing - Phase 1");
@@ -121,8 +121,8 @@ public class Main {
 //                // 3 4 5
 //            }
 //        }
-    }
-}
+//    }
+//}
 
 /*
 NOTE: graphics functionality has been disabled for phase 1. the above code is for testing overall functionality.

@@ -24,6 +24,7 @@ public class Server implements Runnable, ServerInterface {
     public Server() {
         db = new Database("accounts.txt", "reservations.txt");
     }
+
     //connects with client and handles actions by the user
     private void handleClient(Socket socket, Server server) {
         try (ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());

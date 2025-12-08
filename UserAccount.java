@@ -1,9 +1,12 @@
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * A class that creates accounts for users who want to create reservations at a restaurant.
+ * Represents an account that is used to sign into the program
+ * and create/view/delete reservations. Contains basic validation
+ * for username, fullName, email, and password. Email must match
+ * an expected format. Also holds a list of the reservations
+ * created under it.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
