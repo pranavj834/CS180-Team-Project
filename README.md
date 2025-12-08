@@ -15,28 +15,23 @@ Ensure the server is running before attempting to run the client.
 #### Pranav Jasti - Submitted presentation and report on Brightspace
 
 ## Core Classes
-### Database.java
+### Screen.java
 
-Purpose: Persists user account and reservation data by loading and saving information to text files
-(accounts.txt and reservations.txt). It also manages the seat availability status for all reservations
-across different time slots using a HashMap<String, boolean[]>.
+Purpose: Handles the Graphical User Interface (GUI) for the client-side application. It serves as the main 
+interaction point for users to register, login, and manage reservations.
 
-Functionality: Now includes methods for loading (loadFromFiles) and saving (saveToFiles) the entire
-database state to disk, making the data persistent between server restarts. It uses synchronization for thread-safety.
+Functionality: Extends JPanel and implements ActionListener to manage the application's visual state 
+and event handling. Uses JTextFields as input and JButtons as method calls.
 
-Dependencies: Implements DatabaseInterface, uses UserAccount and Reservation.
+Communicates directly with the Client class to send requests to the server 
+(e.g., client.login, client.addReservation, client.updateSeatStatuses).
 
-Methods (excluding generic getters/setters and Persistence API methods):
-- addAccount: Adds account if it doesn't exist; returns success/failure. Saves data.
-- addReservation: Checks for time conflicts/account existence, adds reservation, updates seatStatuses.
-  Returns success/failure. Saves data.
-- deleteAccount: Removes account and all its associated reservations. Returns success/failure. Saves data.
-- deleteReservation: Removes a specific reservation from the account and the main list, and frees up the
-  reserved seats in seatStatuses. Returns success/failure. Saves data.
-- getAccountReservations: Returns a list of reservations made by a specific account.
-- getSeatStatusesAtTime: Returns a boolean[] of the 30 seat statuses for a given timestamp, creating a
-  new array if the timestamp is not yet tracked.
-- toString: Prints all user accounts and reservations.
+Includes a visual grid system (using JLabels) to display real-time seat availability to the user when booking.
+
+Performs input validation for dates, party sizes, and required fields. Provides immediate feedback 
+via error labels and confirmation dialogs.
+
+Dependencies: Implements ScreenInterface. Uses Client, UserAccount, and standard Java Swing/AWT libraries.
 
 ## Network Communication Classes (Phase 2; updated with GUI in Phase 3)
 ### Server.java
@@ -83,6 +78,29 @@ Functionality: Used to identify the intent of a Packet. Examples include LOGIN, 
 GET_SEAT_STATUSES_AT_TIME, etc.
 
 ## Utility Classes (Phase 1)
+
+### Database.java
+
+Purpose: Persists user account and reservation data by loading and saving information to text files
+(accounts.txt and reservations.txt). It also manages the seat availability status for all reservations
+across different time slots using a HashMap<String, boolean[]>.
+
+Functionality: Now includes methods for loading (loadFromFiles) and saving (saveToFiles) the entire
+database state to disk, making the data persistent between server restarts. It uses synchronization for thread-safety.
+
+Dependencies: Implements DatabaseInterface, uses UserAccount and Reservation.
+
+Methods (excluding generic getters/setters and Persistence API methods):
+- addAccount: Adds account if it doesn't exist; returns success/failure. Saves data.
+- addReservation: Checks for time conflicts/account existence, adds reservation, updates seatStatuses.
+  Returns success/failure. Saves data.
+- deleteAccount: Removes account and all its associated reservations. Returns success/failure. Saves data.
+- deleteReservation: Removes a specific reservation from the account and the main list, and frees up the
+  reserved seats in seatStatuses. Returns success/failure. Saves data.
+- getAccountReservations: Returns a list of reservations made by a specific account.
+- getSeatStatusesAtTime: Returns a boolean[] of the 30 seat statuses for a given timestamp, creating a
+  new array if the timestamp is not yet tracked.
+- toString: Prints all user accounts and reservations.
 
 ### UserAccount.java
 

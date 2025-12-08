@@ -7,7 +7,8 @@ import java.util.ArrayList;
 
 /**
  * Provides client-side functionality through the
- * command-line. Communicates to the server.
+ * command-line. The Screen class calls the methods
+ * in this class to communicate to the server.
  *
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
