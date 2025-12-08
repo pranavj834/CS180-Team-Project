@@ -108,11 +108,11 @@ public class Client implements ClientInterface {
     /*adds a reservation when user wants to book reservation; checks if the booking is
     between 9 AM to 9 PM because those are the hours of operation
      */
-    public boolean addReservation(String name, String timestamp,
+    public int addReservation(String name, String timestamp,
                                   int partySize, ArrayList<Integer> seats) {
         try {
             if (timestamp == null || timestamp.length() < 16) {
-                return false;
+                return -1;
             }
 
             String timePart = timestamp.substring(11, 16);
@@ -120,19 +120,19 @@ public class Client implements ClientInterface {
             int hour = Integer.parseInt(hourString);
 
             if (hour < 9 || hour > 21) {
-                return false;
+                return -2;
             }
 
             if (hour == 21) {
                 String minuteString = timePart.substring(3, 5);
                 int minute = Integer.parseInt(minuteString);
-                if (minute > 0) {
-                    return false;
+                if (minute != 0) {
+                    return -2;
                 }
             }
 
         } catch (NumberFormatException e) {
-            return false;
+            return -1;
         }
         Reservation reservation = new Reservation(name, currentAccount.getUsername(), timestamp, partySize, seats);
         Packet request = new Packet(PacketType.ADD_RESERVATION, new Object[]{currentAccount, reservation});
@@ -147,9 +147,9 @@ public class Client implements ClientInterface {
         }
 
         if (response.getObj() != null && (boolean) response.getObj()[0]) {
-            return true;
+            return 1;
         } else {
-            return false;
+            return 0;
         }
     }
 

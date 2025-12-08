@@ -81,8 +81,8 @@ public class Reservation implements Serializable, ReservationInterface {
 			throw new IllegalArgumentException("Number of seats must equal party size");
 		}
 		for (Integer s : seats) {
-			if (s == null || s <= 0) {
-				throw new IllegalArgumentException("Seat numbers must be positive integers");
+			if (s == null || s < 0 || s > 29) {
+				throw new IllegalArgumentException("Seat numbers must be within the range 0-29 inclusive");
 			}
 		}
 	}

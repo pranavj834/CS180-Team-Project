@@ -237,9 +237,20 @@ public class Database implements DatabaseInterface {
     // adds reservation
     @Override
     public synchronized boolean addReservation(UserAccount account, Reservation reservation) {
-        for (Reservation r : reservations) {
-            if (r.getTimestamp().equals(reservation.getTimestamp()) && r.getSeats().equals(reservation.getSeats())) {
-                return false;
+        String timestamp = reservation.getTimestamp();
+        boolean[] currentSeatsAtTime = seatStatuses.get(timestamp);
+
+        System.out.println("database attempting to add");
+        if (currentSeatsAtTime != null) {
+            for (Integer requestedSeat : reservation.getSeats()) { // validate seats availability
+                if (requestedSeat < 0 || requestedSeat > 29) {
+                    System.out.println("out of bounds");
+                    return false;
+                }
+                if (currentSeatsAtTime[requestedSeat]) {
+                    System.out.println("seat(s) already taken");
+                    return false;
+                }
             }
         }
 

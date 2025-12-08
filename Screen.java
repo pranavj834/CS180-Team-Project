@@ -2,6 +2,9 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -408,7 +411,8 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
             // re-use display area for seat check
             scrollPane.setVisible(true);
-            displayArea.setText("Enter a timestamp (YYYY-MM-DD HH:MM) and click Check Availability to see seats.");
+            displayArea.setText("Enter a timestamp (YYYY-MM-DD HH:MM) and click Check Availability to see seats.\n" +
+                    "Hours of operation are 09:00 to 21:00 inclusive.");
             seatingDisplay.setVisible(true);
             for (int i = 0; i < row; i++){
                 for (int j = 0; j < col; j++){
@@ -511,28 +515,39 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
 
                 // 3. Only proceed if user clicks "Yes"
                 if (response == JOptionPane.YES_OPTION) {
-                    boolean success = client.addReservation(name, time, size, seats);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime reservationTime = LocalDateTime.parse(time, formatter);
 
-                    if (success) {
-                        errorLabel.setText("Reservation Successful!");
-                        nameField2.setText("");
-                        timestampField.setText("");
-                        partySizeField.setText("");
-                        seatsField.setText("");
-                        displayArea.setText("Reservation booked.");
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime sevenDaysLater = now.plusDays(7);
 
-                        // Clear grid on success
-                        for (int i = 0; i < row; i++) {
-                            for (int j = 0; j < col; j++) {
-                                grid[i][j].setBackground(new Color(55, 55, 55));
-                            }
-                        }
+                    if (reservationTime.isBefore(now)) {
+                        errorLabel.setText("Failed: cannot book a reservation in the past.");
+                    } else if (reservationTime.isAfter(sevenDaysLater)) {
+                        errorLabel.setText("Failed: reservation outside the next seven days.");
                     } else {
-                        errorLabel.setText("Failed: overlap or invalid data.");
+                        int addedReservation = client.addReservation(name, time, size, seats);
+                        System.out.println(addedReservation);
+                        if (addedReservation == 1) {
+                            displayArea.setText("Reservation booked.");
+
+                            // Clear grid on success
+                            for (int i = 0; i < row; i++) {
+                                for (int j = 0; j < col; j++) {
+                                    grid[i][j].setBackground(new Color(55, 55, 55));
+                                }
+                            }
+                        } else if (addedReservation == 0){
+                            errorLabel.setText("Failed: one or more seats may be unavailable.");
+                        } else if (addedReservation == -1){
+                            errorLabel.setText("Failed: invalid data.");
+                        } else if (addedReservation == -2){
+                            errorLabel.setText("Failed: timestamp outside hours of operation (09:00 - 21:00)");
+                        }
                     }
                 }
             } catch (Exception ex) {
-                errorLabel.setText("Invalid format. Use numbers for size/seats.");
+                errorLabel.setText("Invalid format. Ensure timestamp, size, and seats are entered properly.");
             }
             repaint();
         }
