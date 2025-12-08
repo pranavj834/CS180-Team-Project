@@ -38,15 +38,15 @@ public class Database implements DatabaseInterface {
     /**
      * Saves all accounts and reservations to the given text files.
      *
-     * @param accountFile      path for accounts file
-     * @param reservationFile  path for reservations file
+     * @param accFile      path for accounts file
+     * @param resFile  path for reservations file
      * @throws IOException if writing fails
      */
     @Override
-    public synchronized void saveToFiles(String accountFile, String reservationFile) {
+    public synchronized void saveToFiles(String accFile, String resFile) {
         try {
-            saveAccounts(accountFile);
-            saveReservations(reservationFile);
+            saveAccounts(accFile);
+            saveReservations(resFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,17 +56,17 @@ public class Database implements DatabaseInterface {
      * Loads all accounts and reservations from the given text files.
      * Existing in-memory data is cleared first.
      *
-     * @param accountFile      path for accounts file
-     * @param reservationFile  path for reservations file
+     * @param accFile      path for accounts file
+     * @param resFile  path for reservations file
      * @throws IOException if reading fails
      */
     @Override
-    public synchronized void loadFromFiles(String accountFile, String reservationFile) {
+    public synchronized void loadFromFiles(String accFile, String resFile) {
         accounts.clear();
         reservations.clear();
         try {
-            loadAccounts(accountFile);
-            loadReservations(reservationFile);
+            loadAccounts(accFile);
+            loadReservations(resFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -85,8 +85,8 @@ public class Database implements DatabaseInterface {
 
     // ---------- internal: accounts ----------
 
-    private void saveAccounts(String accountFile) throws IOException {
-        try (PrintWriter out = new PrintWriter(new FileWriter(accountFile))) {
+    private void saveAccounts(String accFile) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(accFile))) {
             out.println(accounts.size());
             for (UserAccount account : accounts) {
                 // username password fullName email
@@ -100,8 +100,8 @@ public class Database implements DatabaseInterface {
     }
 
     //loads accounts from the database
-    private void loadAccounts(String accountFile) throws IOException {
-        File f = new File(accountFile);
+    private void loadAccounts(String accFile) throws IOException {
+        File f = new File(accFile);
         if (!f.exists()) {
             return; // nothing to load yet
         }
@@ -130,8 +130,8 @@ public class Database implements DatabaseInterface {
 
     // ---------- internal: reservations ----------
 
-    private void saveReservations(String reservationFile) throws IOException {
-        try (PrintWriter out = new PrintWriter(new FileWriter(reservationFile))) {
+    private void saveReservations(String resFile) throws IOException {
+        try (PrintWriter out = new PrintWriter(new FileWriter(resFile))) {
             // First line: number of reservations
             out.println(reservations.size());
 
@@ -159,8 +159,8 @@ public class Database implements DatabaseInterface {
     }
 
     //loads reservations from database
-    private void loadReservations(String reservationFile) throws IOException {
-        File f = new File(reservationFile);
+    private void loadReservations(String resFile) throws IOException {
+        File f = new File(resFile);
         if (!f.exists()) {
             return; // nothing to load yet
         }
@@ -263,7 +263,7 @@ public class Database implements DatabaseInterface {
         account.addReservation(reservation);
         reservations.add(reservation);
 
-        boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities at the time
+        boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities @ time
         if (restaurantSeats == null) {
             restaurantSeats = new boolean[30]; // if doesn't exist yet, everything at the timeslot is free
         }
@@ -307,7 +307,7 @@ public class Database implements DatabaseInterface {
         if (removed) {
             reservations.remove(reservation); // only remove if the given account created the reservation
 
-            boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get the availabilities at the time
+            boolean[] restaurantSeats = seatStatuses.get(reservation.getTimestamp()); // get availabilities @ time
             ArrayList<Integer> seats = reservation.getSeats();
             for (Integer seatNumber: seats) {
                 restaurantSeats[seatNumber] = false; // free up seats

@@ -228,16 +228,16 @@ public class DatabaseTest {
 
     @Test
     public void testSeatStatusMethods() {
-        Database db = new Database(ACCOUNT_FILE, RESERVATION_FILE);
+        Database database = new Database(ACCOUNT_FILE, RESERVATION_FILE);
 
         //tests getSeatStatuses() so that returns modifiable map
-        HashMap<String, boolean[]> map = db.getSeatStatuses();
+        HashMap<String, boolean[]> map = database.getSeatStatuses();
         assertNotNull("Should be not null since statuses exist", map);
-        assertSame(map, db.getSeatStatuses());
+        assertSame(map, database.getSeatStatuses());
 
         //tests getSeatStatusesAtTime() creates a new entry when needed
         assertFalse(map.containsKey("10:00"));
-        boolean[] created = db.getSeatStatusesAtTime("10:00");
+        boolean[] created = database.getSeatStatusesAtTime("10:00");
         assertTrue(map.containsKey("10:00"));
 
         assertNotNull(created);
@@ -253,7 +253,7 @@ public class DatabaseTest {
 
         map.put("11:00", existing);
 
-        boolean[] fetched = db.getSeatStatusesAtTime("11:00");
+        boolean[] fetched = database.getSeatStatusesAtTime("11:00");
 
         assertSame(existing, fetched);
         assertTrue(fetched[2]);

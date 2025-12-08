@@ -112,6 +112,7 @@ public class Server implements Runnable, ServerInterface {
             try {
                 if (socket != null && !socket.isClosed()) socket.close();
             } catch (IOException ignored) {
+                System.err.println("Error returned while closing socket: " + ignored.getMessage());
             }
         }
     }

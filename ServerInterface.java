@@ -9,5 +9,5 @@
 
 public interface ServerInterface {
     void run();
-    static void main(String[] args) {};
+    static void main(String[] args) { };
 }

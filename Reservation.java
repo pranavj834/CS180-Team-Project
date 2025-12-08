@@ -45,30 +45,30 @@ public class Reservation implements Serializable, ReservationInterface {
 
 	// ========== VALIDATION HELPERS ==========
 
-	private void validateName(String name) {
-		if (name == null || name.trim().isEmpty()) {
+	private void validateName(String n) {
+		if (n == null || n.trim().isEmpty()) {
 			throw new IllegalArgumentException("Reservation name cannot be blank");
 		}
 	}
 
-	private void validateUsername(String username) {
-		if (username == null || username.trim().isEmpty()) {
+	private void validateUsername(String un) {
+		if (un == null || un.trim().isEmpty()) {
 			throw new IllegalArgumentException("Reservation username cannot be blank");
 		}
 	}
 
-	private void validateTimestamp(String timestamp) {
-		if (timestamp == null || timestamp.trim().isEmpty()) {
+	private void validateTimestamp(String ts) {
+		if (ts == null || ts.trim().isEmpty()) {
 			throw new IllegalArgumentException("Timestamp cannot be blank");
 		}
 
-		if (!timestamp.matches(TIMESTAMP_REGEX)) {
+		if (!ts.matches(TIMESTAMP_REGEX)) {
 			throw new IllegalArgumentException("Time must be in format YYYY-MM-DD HH:MM");
 		}
 	}
 
-	private void validatePartySize(int partySize) {
-		if (partySize <= 0) {
+	private void validatePartySize(int ps) {
+		if (ps <= 0) {
 			throw new IllegalArgumentException("Party size must be greater than 0");
 		}
 	}

@@ -537,11 +537,11 @@ public class Screen extends JPanel implements ActionListener, ScreenInterface {
                                     grid[i][j].setBackground(new Color(55, 55, 55));
                                 }
                             }
-                        } else if (addedReservation == 0){
+                        } else if (addedReservation == 0) {
                             errorLabel.setText("Failed: one or more seats may be unavailable.");
-                        } else if (addedReservation == -1){
+                        } else if (addedReservation == -1) {
                             errorLabel.setText("Failed: invalid data.");
-                        } else if (addedReservation == -2){
+                        } else if (addedReservation == -2) {
                             errorLabel.setText("Failed: timestamp outside hours of operation (09:00 - 21:00)");
                         }
                     }

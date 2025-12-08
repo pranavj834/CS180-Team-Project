@@ -196,12 +196,8 @@ public class Client implements ClientInterface {
         } catch (ClassNotFoundException e) {
             System.err.println("Serialization error: " + e.getMessage());
         }
-        //System.out.println(response.getObj()[0]);
-        if (response.getObj() != null && (boolean) response.getObj()[0]) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return response.getObj() != null && (boolean) response.getObj()[0];
     }
 
 
