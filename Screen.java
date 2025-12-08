@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * <p>Purdue University -- CS18000 -- Fall 2025</p>
  *
  * @author jastip, chan531, lab sec L23
- * @version December 6, 2025
+ * @version December 7, 2025
  */
 
 public class Screen extends JPanel implements ActionListener, ScreenInterface {
