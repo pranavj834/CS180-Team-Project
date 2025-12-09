@@ -67,14 +67,11 @@ public class Server implements Runnable, ServerInterface {
                     out.writeObject(new Packet(PacketType.ADD_RESERVATION, new Object[]{deleted}));
 
                 } else if (packet.getType() == PacketType.DELETE_RESERVATION) {
-                    System.out.println("server");
                     UserAccount account = (UserAccount) packet.getObj()[0];
                     Reservation reservation = (Reservation) packet.getObj()[1];
-                    System.out.println(account);
-                    System.out.println(reservation);
                     boolean deleted = db.deleteReservation(account, reservation);
-                    System.out.println("deleted: " + deleted);
                     out.writeObject(new Packet(PacketType.ADD_RESERVATION, new Object[]{deleted}));
+
                 } else if (packet.getType() == PacketType.GET_SEAT_STATUSES_AT_TIME) {
                     String timestamp = (String) packet.getObj()[0];
                     boolean[] statuses = db.getSeatStatusesAtTime(timestamp);

@@ -108,13 +108,11 @@ public class UserAccount implements Serializable, UserAccountInterface {
 	//books a reservation
 	public synchronized boolean addReservation(Reservation res) {
 		boolean added = reservations.add(res);
-        System.out.println("added: " + added);
         return reservations.add(res);
 	}
 
 	//cancels a reservation
 	public synchronized boolean removeReservation(Reservation res) {
-        System.out.println("useraccount delete");
         System.out.println(reservations);
         System.out.println(reservations.remove(res));
         return reservations.remove(res);
